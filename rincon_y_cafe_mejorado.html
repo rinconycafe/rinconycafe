@@ -1,0 +1,1782 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rincón & Café — Un momento para vos</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* ==========================================================================
+           1. VARIABLES & REGLAS GENERALES
+           ========================================================================== */
+        :root {
+            --primary-dark: #3c2415;     /* Marrón café intenso */
+            --primary-medium: #6f4e37;   /* Marrón café mediano */
+            --terracota: #c86d51;        /* Terracota principal */
+            --accent-warm: #c88a58;      /* Tono tierra cálido */
+            --accent-light: #e8d0b5;     /* Beige claro */
+            --sage-green: #8a9a86;       /* Verde salvia */
+            --sage-light: #eef2ed;       /* Verde salvia suave */
+            --gold-matte: #d4af37;       /* Dorado mate para detalles */
+            --bg-cream: #faf6f0;         /* Crema de fondo suave */
+            --bg-card: #ffffff;          /* Blanco para tarjetas */
+            --text-dark: #2b1e16;        /* Texto principal */
+            --text-muted: #66554b;       /* Texto secundario */
+            --shadow-soft: 0 10px 30px rgba(60, 36, 21, 0.08);
+            --shadow-hover: 0 18px 40px rgba(60, 36, 21, 0.16);
+            --radius-lg: 16px;
+            --radius-md: 10px;
+            --radius-sm: 6px;
+            --transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            font-size: 16px;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-cream);
+            color: var(--text-dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4, .brand-font {
+            font-family: 'Playfair Display', serif;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        .section-padding {
+            padding: 90px 0;
+        }
+
+        .section-header {
+            text-align: center;
+            max-width: 750px;
+            margin: 0 auto 50px auto;
+        }
+
+        .section-subtitle {
+            color: var(--terracota);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            color: var(--primary-dark);
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--terracota), var(--gold-matte));
+            border-radius: 2px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 14px 32px;
+            border-radius: 30px;
+            font-weight: 500;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .btn-primary {
+            background-color: var(--terracota);
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            background-color: #b55a3f;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(200, 109, 81, 0.35);
+        }
+
+        .btn-secondary {
+            background-color: var(--primary-dark);
+            color: #ffffff;
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--primary-medium);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(60, 36, 21, 0.3);
+        }
+
+        .badge-tag {
+            background-color: rgba(200, 109, 81, 0.12);
+            color: var(--terracota);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        /* ==========================================================================
+           2. ANIMACIONES Y EFECTOS
+           ========================================================================== */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .floating {
+            animation: float 4s ease-in-out infinite;
+        }
+
+        /* ==========================================================================
+           3. HEADER & NAVEGACIÓN (CON PLATITO DE TÉ Y VAPOR DE CAFÉ)
+           ========================================================================== */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            transition: var(--transition);
+            background-color: rgba(250, 246, 240, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(232, 208, 181, 0.4);
+        }
+
+        header.scrolled {
+            box-shadow: 0 4px 20px rgba(60, 36, 21, 0.08);
+            height: 75px;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 85px;
+            transition: var(--transition);
+        }
+
+        header.scrolled .navbar {
+            height: 75px;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+        }
+
+        /* PLATITO DE TÉ Y ANIMACIÓN DE LOGO */
+        .saucer-base {
+            width: 50px;
+            height: 50px;
+            background: #e4d5c7;
+            border: 3px solid var(--terracota);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: var(--transition);
+        }
+
+        .saucer-base::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            width: 34px;
+            height: 5px;
+            background: rgba(0,0,0,0.15);
+            border-radius: 50%;
+            z-index: 0;
+        }
+
+        .logo-container:hover .saucer-base {
+            transform: rotate(10deg) scale(1.05);
+        }
+
+        .logo-icon-box {
+            position: relative;
+            z-index: 2;
+            font-size: 1.4rem;
+            color: var(--primary-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* VAPOR ANIMADO PARA EL CAFÉ */
+        .steam-container {
+            position: absolute;
+            top: -12px;
+            display: flex;
+            gap: 3px;
+        }
+
+        .steam {
+            width: 3px;
+            height: 12px;
+            background: rgba(111, 78, 55, 0.5);
+            border-radius: 3px;
+            animation: steamAnim 1.8s infinite ease-out;
+        }
+
+        .steam:nth-child(2) { animation-delay: 0.4s; }
+        .steam:nth-child(3) { animation-delay: 0.8s; }
+
+        @keyframes steamAnim {
+            0% { transform: translateY(0) scaleX(1); opacity: 0; }
+            50% { opacity: 0.8; }
+            100% { transform: translateY(-14px) scaleX(2); opacity: 0; }
+        }
+
+        .logo-text {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            letter-spacing: -0.5px;
+        }
+
+        .logo-text span {
+            color: var(--terracota);
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 28px;
+        }
+
+        .nav-link {
+            font-weight: 500;
+            color: var(--text-dark);
+            position: relative;
+            padding: 5px 0;
+            transition: var(--transition);
+            font-size: 0.95rem;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0%;
+            height: 2px;
+            background-color: var(--terracota);
+            transition: var(--transition);
+        }
+
+        .nav-link:hover {
+            color: var(--terracota);
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .menu-toggle {
+            display: none;
+            font-size: 1.5rem;
+            color: var(--primary-dark);
+            cursor: pointer;
+        }
+
+        /* ==========================================================================
+           4. INICIO (HERO SECTION)
+           ========================================================================== */
+        #inicio {
+            min-height: 100vh;
+            background: linear-gradient(rgba(43, 30, 22, 0.72), rgba(43, 30, 22, 0.65)), 
+                        url('https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?q=80&w=1920&auto=format&fit=crop') center/cover no-repeat;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #ffffff;
+            padding-top: 80px;
+            position: relative;
+        }
+
+        .hero-content {
+            max-width: 850px;
+            padding: 20px;
+            animation: fadeIn 1.2s ease-out;
+        }
+
+        .hero-subtitle {
+            font-size: 1.6rem;
+            font-style: italic;
+            color: var(--accent-light);
+            margin-bottom: 15px;
+            font-family: 'Playfair Display', serif;
+            display: inline-block;
+            border-bottom: 1px solid rgba(232, 208, 181, 0.3);
+            padding-bottom: 5px;
+        }
+
+        .hero-title {
+            font-size: 4.2rem;
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 22px;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            letter-spacing: -1px;
+        }
+
+        .hero-description {
+            font-size: 1.25rem;
+            margin-bottom: 35px;
+            font-weight: 300;
+            color: #f5ebe6;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* ==========================================================================
+           5. SOBRE NOSOTROS (Nuestra Historia, Propósito, Chips Desplegables)
+           ========================================================================== */
+        #nosotros {
+            background-color: var(--bg-cream);
+        }
+
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            align-items: center;
+        }
+
+        .about-image {
+            position: relative;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .about-image img {
+            width: 100%;
+            height: 480px;
+            object-fit: cover;
+            transition: var(--transition);
+        }
+
+        .about-image:hover img {
+            transform: scale(1.04);
+        }
+
+        .about-badge-floating {
+            position: absolute;
+            bottom: 25px;
+            right: 25px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(5px);
+            padding: 15px 22px;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-soft);
+            border-left: 4px solid var(--terracota);
+        }
+
+        .about-badge-floating p {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--primary-dark);
+            margin: 0;
+        }
+
+        .about-text h3 {
+            font-size: 2.1rem;
+            color: var(--primary-dark);
+            margin-bottom: 20px;
+            line-height: 1.3;
+        }
+
+        .about-text p {
+            color: var(--text-muted);
+            margin-bottom: 18px;
+            font-size: 1.02rem;
+            text-align: justify;
+        }
+
+        /* CHIPS INTERACTIVOS COMPACTOS CON DESPLIEGUE CONTINUO */
+        .interactive-chips-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .chip-interactive-item {
+            background-color: rgba(138, 154, 134, 0.12);
+            border: 1px solid rgba(138, 154, 134, 0.3);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .chip-interactive-item:hover {
+            border-color: var(--terracota);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .chip-header {
+            padding: 12px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.92rem;
+            font-weight: 500;
+            color: var(--primary-dark);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .chip-header:focus-visible {
+            outline: 2px solid var(--terracota);
+            outline-offset: -2px;
+        }
+
+        .chip-header-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chip-header i.icon-left {
+            color: var(--sage-green);
+            font-size: 1.1rem;
+        }
+
+        .chip-header i.arrow-icon {
+            font-size: 0.85rem;
+            color: var(--terracota);
+            transition: transform 0.3s ease;
+        }
+
+        .chip-interactive-item.active .arrow-icon {
+            transform: rotate(180deg);
+        }
+
+        .chip-dropdown-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0, 1, 0, 1), padding 0.3s ease;
+            background: #ffffff;
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            border-top: 1px solid rgba(232, 208, 181, 0.3);
+            padding: 0 18px;
+        }
+
+        .chip-interactive-item.active .chip-dropdown-content {
+            max-height: 500px;
+            padding: 14px 18px;
+            transition: max-height 0.5s ease-in, padding 0.3s ease;
+        }
+
+        .chip-list-mini {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .chip-list-mini li {
+            background: var(--bg-cream);
+            padding: 5px 10px;
+            border-radius: var(--radius-sm);
+            font-size: 0.82rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border-left: 2px solid var(--terracota);
+        }
+
+        /* Misión, Visión, Valores Cards */
+        .identity-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 60px;
+        }
+
+        .identity-card {
+            background: var(--bg-card);
+            padding: 30px;
+            border-radius: var(--radius-md);
+            border-top: 4px solid var(--terracota);
+            box-shadow: var(--shadow-soft);
+            transition: var(--transition);
+        }
+
+        .identity-card:nth-child(2) {
+            border-top-color: var(--sage-green);
+        }
+
+        .identity-card:nth-child(3) {
+            border-top-color: var(--gold-matte);
+        }
+
+        .identity-card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .identity-card h4 {
+            font-size: 1.3rem;
+            color: var(--primary-dark);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .identity-card p {
+            font-size: 0.92rem;
+            color: var(--text-muted);
+        }
+
+        /* ==========================================================================
+           6. POR QUÉ ELEGIRNOS & ESPACIOS DEL LOCAL (Con sus 4 Cuadritos)
+           ========================================================================== */
+        #elegirnos {
+            background-color: #f2ebe3;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 30px;
+        }
+
+        .feature-card {
+            background: var(--bg-card);
+            padding: 35px 25px;
+            border-radius: var(--radius-lg);
+            text-align: center;
+            box-shadow: var(--shadow-soft);
+            transition: var(--transition);
+            border: 1px solid rgba(232, 208, 181, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .feature-icon {
+            width: 70px;
+            height: 70px;
+            background-color: rgba(200, 109, 81, 0.12);
+            color: var(--terracota);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin: 0 auto 22px auto;
+            transition: var(--transition);
+        }
+
+        .feature-card:hover .feature-icon {
+            background-color: var(--terracota);
+            color: #ffffff;
+            transform: scale(1.1);
+        }
+
+        .feature-card h3 {
+            font-size: 1.3rem;
+            color: var(--primary-dark);
+            margin-bottom: 12px;
+        }
+
+        .feature-card p {
+            color: var(--text-muted);
+            font-size: 0.93rem;
+        }
+
+        /* ==========================================================================
+           7. MENÚ (Con Nombres Originales y Cariñosos)
+           ========================================================================== */
+        #menu {
+            background-color: var(--bg-cream);
+        }
+
+        .menu-category {
+            margin-bottom: 55px;
+            transition: var(--transition);
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            border-bottom: 2px solid var(--accent-light);
+            padding-bottom: 10px;
+        }
+
+        .category-header i {
+            font-size: 1.8rem;
+            color: var(--terracota);
+        }
+
+        .category-header h3 {
+            font-size: 1.8rem;
+            color: var(--primary-dark);
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+            gap: 22px;
+        }
+
+        .menu-item {
+            background-color: var(--bg-card);
+            padding: 22px;
+            border-radius: var(--radius-md);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: var(--transition);
+            border-left: 4px solid transparent;
+            position: relative;
+        }
+
+        .menu-item:hover {
+            border-left-color: var(--terracota);
+            transform: translateX(6px);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .item-info {
+            padding-right: 15px;
+        }
+
+        .item-info h4 {
+            font-size: 1.15rem;
+            color: var(--primary-dark);
+            margin-bottom: 4px;
+        }
+
+        .item-info p {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+        }
+
+        .item-price {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--terracota);
+            background-color: rgba(200, 109, 81, 0.1);
+            padding: 6px 14px;
+            border-radius: 20px;
+            white-space: nowrap;
+        }
+
+        /* ==========================================================================
+           8. PROMOCIONES & BENEFICIO ESPECIAL
+           ========================================================================== */
+        #promociones {
+            background-color: #2b1e16;
+            color: #ffffff;
+            position: relative;
+            background-image: radial-gradient(rgba(200, 109, 81, 0.2) 1px, transparent 0);
+            background-size: 28px 28px;
+        }
+
+        #promociones .section-title {
+            color: #ffffff;
+        }
+
+        .promo-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .promo-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(232, 208, 181, 0.2);
+            border-radius: var(--radius-lg);
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition);
+            backdrop-filter: blur(8px);
+        }
+
+        .promo-card.featured {
+            border-color: var(--terracota);
+            background: rgba(200, 109, 81, 0.12);
+            transform: scale(1.02);
+        }
+
+        .promo-badge {
+            position: absolute;
+            top: 22px;
+            right: -38px;
+            background-color: var(--terracota);
+            color: #ffffff;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 5px 42px;
+            transform: rotate(45deg);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .promo-card:hover {
+            transform: translateY(-8px);
+            background: rgba(255, 255, 255, 0.09);
+        }
+
+        .promo-icon {
+            font-size: 2.6rem;
+            color: var(--accent-light);
+            margin-bottom: 15px;
+        }
+
+        .promo-title {
+            font-size: 1.6rem;
+            margin-bottom: 12px;
+            color: var(--accent-light);
+        }
+
+        .promo-desc {
+            font-size: 1.05rem;
+            margin-bottom: 25px;
+            color: #e0d0c5;
+            line-height: 1.5;
+        }
+
+        .promo-price {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--gold-matte);
+            margin-bottom: 20px;
+        }
+
+        /* Beneficio Especial de la Semana (Banner posterior a los combos) */
+        .loyalty-banner {
+            margin-top: 50px;
+            background: linear-gradient(135deg, rgba(200, 109, 81, 0.2), rgba(138, 154, 134, 0.2));
+            border: 1px solid rgba(232, 208, 181, 0.3);
+            border-radius: var(--radius-lg);
+            padding: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .loyalty-content h3 {
+            font-size: 1.5rem;
+            color: var(--accent-light);
+            margin-bottom: 6px;
+        }
+
+        .loyalty-content p {
+            color: #d5c0b3;
+            font-size: 0.95rem;
+        }
+
+        /* ==========================================================================
+           9. HORARIOS & CONTACTO (Formato exacto solicitado)
+           ========================================================================== */
+        #contacto {
+            background-color: var(--bg-cream);
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+        }
+
+        .contact-info {
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            background: var(--bg-card);
+            padding: 22px;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-soft);
+            transition: var(--transition);
+        }
+
+        .contact-item:hover {
+            transform: translateX(5px);
+        }
+
+        .contact-icon {
+            width: 52px;
+            height: 52px;
+            background-color: rgba(200, 109, 81, 0.12);
+            color: var(--terracota);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            flex-shrink: 0;
+        }
+
+        .contact-details h4 {
+            font-size: 1.15rem;
+            color: var(--primary-dark);
+            margin-bottom: 5px;
+        }
+
+        .contact-details p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .schedule-badge {
+            display: inline-block;
+            background: var(--sage-light);
+            color: var(--primary-dark);
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-top: 5px;
+        }
+
+        .social-box {
+            background: var(--bg-card);
+            padding: 40px 35px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-soft);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid rgba(232, 208, 181, 0.3);
+        }
+
+        .social-box h3 {
+            font-size: 1.8rem;
+            color: var(--primary-dark);
+            margin-bottom: 12px;
+        }
+
+        .social-box p {
+            color: var(--text-muted);
+            margin-bottom: 25px;
+            font-size: 0.95rem;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .social-btn {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background-color: var(--bg-cream);
+            color: var(--primary-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            transition: var(--transition);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .social-btn:hover {
+            background-color: var(--terracota);
+            color: #ffffff;
+            transform: translateY(-5px) rotate(8deg);
+        }
+
+        /* ==========================================================================
+           10. FOOTER
+           ========================================================================== */
+        footer {
+            background-color: var(--primary-dark);
+            color: var(--accent-light);
+            text-align: center;
+            padding: 35px 0;
+            font-size: 0.9rem;
+            border-top: 1px solid rgba(255,255,255,0.08);
+        }
+
+        footer p {
+            margin-bottom: 6px;
+        }
+
+        /* ==========================================================================
+           11. BOTÓN VOLVER ARRIBA
+           ========================================================================== */
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 48px;
+            height: 48px;
+            background-color: var(--terracota);
+            color: #ffffff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+            z-index: 999;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .back-to-top.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .back-to-top:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-4px);
+        }
+
+        /* ==========================================================================
+           12. RESPONSIVE DESIGN
+           ========================================================================== */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 992px) {
+            .about-grid, .contact-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-title {
+                font-size: 3.2rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .menu-toggle {
+                display: block;
+            }
+
+            .nav-menu {
+                position: fixed;
+                top: 85px;
+                left: -100%;
+                width: 100%;
+                height: calc(100vh - 85px);
+                background-color: var(--bg-cream);
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 25px;
+                transition: var(--transition);
+                box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            }
+
+            .nav-menu.active {
+                left: 0;
+            }
+
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1.2rem;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .menu-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .promo-card.featured {
+                transform: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ==========================================================================
+         ENCABEZADO / NAVEGACIÓN
+         ========================================================================== -->
+    <header id="main-header">
+        <div class="container navbar">
+            <a href="#inicio" class="logo-container">
+                <div class="saucer-base">
+                    <div class="logo-icon-box">
+                        <div class="steam-container">
+                            <span class="steam"></span>
+                            <span class="steam"></span>
+                            <span class="steam"></span>
+                        </div>
+                        <i class="fa-solid fa-mug-hot"></i>
+                    </div>
+                </div>
+                <div class="logo-text">Rincón <span>& Café</span></div>
+            </a>
+
+            <div class="menu-toggle" id="mobile-menu-btn">
+                <i class="fa-solid fa-bars"></i>
+            </div>
+
+            <nav>
+                <ul class="nav-menu" id="nav-menu">
+                    <li><a href="#inicio" class="nav-link">Inicio</a></li>
+                    <li><a href="#nosotros" class="nav-link">Nosotros</a></li>
+                    <li><a href="#elegirnos" class="nav-link">Espacios</a></li>
+                    <li><a href="#menu" class="nav-link">Menú</a></li>
+                    <li><a href="#promociones" class="nav-link">Combos & Promos</a></li>
+                    <li><a href="#contacto" class="nav-link">Horarios & Contacto</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- ==========================================================================
+         1. SECCIÓN INICIO (HERO)
+         ========================================================================== -->
+    <section id="inicio">
+        <div class="hero-content">
+            <span class="hero-subtitle">"Un momento para vos"</span>
+            <h1 class="hero-title">Rincón & Café</h1>
+            <p class="hero-description">Tu pausa perfecta en el día. Un ambiente cálido, acogedor y moderno pensado para estudiar, trabajar o compartir momentos inolvidables en familia.</p>
+            <div class="hero-buttons">
+                <a href="#menu" class="btn btn-primary"><i class="fa-solid fa-utensils"></i> Explorar Menú</a>
+                <a href="#promociones" class="btn btn-secondary"><i class="fa-solid fa-star"></i> Ver Promociones</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==========================================================================
+         2. SECCIÓN SOBRE NOSOTROS (Nuestra historia, propósito y desplegables)
+         ========================================================================== -->
+    <section id="nosotros" class="section-padding">
+        <div class="container">
+            <div class="about-grid reveal">
+                <div class="about-image">
+                    <img src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=80&w=1000&auto=format&fit=crop" alt="Ambiente acogedor de Rincón & Café">
+                    <div class="about-badge-floating">
+                        <p><i class="fa-solid fa-heart" style="color: var(--terracota);"></i> Tu rincón favorito del barrio</p>
+                    </div>
+                </div>
+                <div class="about-text">
+                    <span class="section-subtitle">NUESTRA HISTORIA Y PROPOSITO</span>
+                    <h3>Un espacio pensado para cada momento de tu día</h3>
+                    <p>Rincón & Café nace de la idea de recuperar un espacio de encuentro dentro del barrio: un punto de referencia pensado para quedarse y disfrutar con calma.</p>
+                    <p>Resolvemos dos necesidades muy comunes y distintas: la tranquilidad para estudiar o trabajar con buena conectividad, y un ambiente cálido y cómodo para compartir meriendas en familia o con amigos.</p>
+                    
+                    <!-- CHIPS DESPLEGABLES DENTRO DE SOBRE NOSOTROS -->
+                    <div class="interactive-chips-grid">
+                        
+                        <!-- Wifi Gratis & Enchufes -->
+                        <div class="chip-interactive-item">
+                            <div class="chip-header" role="button" tabindex="0" aria-expanded="false" aria-controls="chip-wifi">
+                                <div class="chip-header-content">
+                                    <i class="fa-solid fa-wifi icon-left"></i>
+                                    <span>Wifi Gratis & Enchufes</span>
+                                </div>
+                                <i class="fa-solid fa-chevron-down arrow-icon"></i>
+                            </div>
+                            <div class="chip-dropdown-content" id="chip-wifi">
+                                <p style="margin-top: 5px;"><strong><i class="fa-solid fa-key" style="color: var(--terracota);"></i> Contraseña de Red:</strong> <code>RinconyCafe123</code></p>
+                                <p style="font-size: 0.83rem; color: var(--text-muted); margin-top: 4px;">Contamos con conectividad de alta velocidad y enchufes individuales en las mesas de estudio.</p>
+                            </div>
+                        </div>
+
+                        <!-- Insumos Frescos -->
+                        <div class="chip-interactive-item">
+                            <div class="chip-header" role="button" tabindex="0" aria-expanded="false" aria-controls="chip-insumos">
+                                <div class="chip-header-content">
+                                    <i class="fa-solid fa-mug-saucer icon-left"></i>
+                                    <span>Insumos Frescos</span>
+                                </div>
+                                <i class="fa-solid fa-chevron-down arrow-icon"></i>
+                            </div>
+                            <div class="chip-dropdown-content" id="chip-insumos">
+                                <p style="margin-top: 5px;">Seleccionamos ingredientes de la mejor calidad diariamente, horneamos nuestra pastelería y panadería cada mañana y molemos granos 100% arábicos al instante de preparar tu taza.</p>
+                            </div>
+                        </div>
+
+                        <!-- Rincón de Lectura -->
+                        <div class="chip-interactive-item">
+                            <div class="chip-header" role="button" tabindex="0" aria-expanded="false" aria-controls="chip-lectura">
+                                <div class="chip-header-content">
+                                    <i class="fa-solid fa-book-open icon-left"></i>
+                                    <span>Rincón de Lectura</span>
+                                </div>
+                                <i class="fa-solid fa-chevron-down arrow-icon"></i>
+                            </div>
+                            <div class="chip-dropdown-content" id="chip-lectura">
+                                <p style="margin-top: 5px; font-weight: 600;">Obras destacadas disponibles en nuestro rincón:</p>
+                                <ul class="chip-list-mini">
+                                    <li><i class="fa-solid fa-bookmark"></i> El Principito</li>
+                                    <li><i class="fa-solid fa-bookmark"></i> Cien años de soledad</li>
+                                    <li><i class="fa-solid fa-bookmark"></i> Rayuela</li>
+                                    <li><i class="fa-solid fa-bookmark"></i> Fahrenheit 451</li>
+                                    <li><i class="fa-solid fa-bookmark"></i> 1984</li>
+                                    <li><i class="fa-solid fa-bookmark"></i> Orgullo y prejuicio</li>
+                                    <li><i class="fa-solid fa-bookmark"></i> El alquimista</li>
+                                    <li><i class="fa-solid fa-bookmark"></i> La sombra del viento</li>
+                                    <li><i class="fa-solid fa-bookmark"></i> Crónica de una muerte...</li>
+                                    <li><i class="fa-solid fa-bookmark"></i> Ficciones</li>
+                                </ul>
+                                <p style="font-size: 0.8rem; color: var(--terracota); font-weight: 600; margin-top: 6px;">¡Intercambio libre de libros disponible!</p>
+                            </div>
+                        </div>
+
+                        <!-- Juegos de Mesa -->
+                        <div class="chip-interactive-item">
+                            <div class="chip-header" role="button" tabindex="0" aria-expanded="false" aria-controls="chip-juegos">
+                                <div class="chip-header-content">
+                                    <i class="fa-solid fa-gamepad icon-left"></i>
+                                    <span>Juegos de Mesa</span>
+                                </div>
+                                <i class="fa-solid fa-chevron-down arrow-icon"></i>
+                            </div>
+                            <div class="chip-dropdown-content" id="chip-juegos">
+                                <p style="margin-top: 5px; font-weight: 600;">Juegos disponibles para solicitar en barra:</p>
+                                <ul class="chip-list-mini">
+                                    <li><i class="fa-solid fa-chess-knight"></i> Ajedrez</li>
+                                    <li><i class="fa-solid fa-chess-board"></i> Damas</li>
+                                    <li><i class="fa-solid fa-dice-d6"></i> Catan</li>
+                                    <li><i class="fa-solid fa-dice-d6"></i> Monopoly</li>
+                                    <li><i class="fa-solid fa-dice-d6"></i> Scrabble</li>
+                                    <li><i class="fa-solid fa-dice-d6"></i> Jenga</li>
+                                    <li><i class="fa-solid fa-dice-d6"></i> UNO</li>
+                                    <li><i class="fa-solid fa-dice-d6"></i> Rummikub</li>
+                                    <li><i class="fa-solid fa-dice-d6"></i> T.E.G.</li>
+                                    <li><i class="fa-solid fa-dice-d6"></i> Dixit</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Misión, Visión y Valores -->
+            <div class="identity-cards reveal">
+                <div class="identity-card">
+                    <h4><i class="fa-solid fa-bullseye" style="color: var(--terracota);"></i> Nuestra Misión</h4>
+                    <p>Ofrecer un espacio de barrio cálido y elegante donde cualquier persona encuentre comodidad, excelente atención y productos de calidad para estudiar, trabajar o compartir en familia.</p>
+                </div>
+                <div class="identity-card">
+                    <h4><i class="fa-solid fa-eye" style="color: var(--sage-green);"></i> Nuestra Visión</h4>
+                    <p>Ser el punto de encuentro de referencia del barrio, reconocido por su calidez, la calidad de sus productos caseros y su capacidad de adaptarse a cada tipo de cliente.</p>
+                </div>
+                <div class="identity-card">
+                    <h4><i class="fa-solid fa-hand-holding-heart" style="color: var(--gold-matte);"></i> Nuestros Valores</h4>
+                    <p>Calidez y cercanía en la atención, insumos frescos seleccionados, inclusión para todas las edades y compromiso con el bienestar de nuestra comunidad.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==========================================================================
+         3. SECCIÓN ESPACIOS Y POR QUÉ ELEGIRNOS
+         ========================================================================== -->
+    <section id="elegirnos" class="section-padding">
+        <div class="container">
+            <div class="section-header reveal">
+                <span class="section-subtitle">LO QUE NOS HACE ESPECIALES</span>
+                <h2 class="section-title">¿Por qué elegir Rincón & Café?</h2>
+            </div>
+
+            <div class="features-grid reveal">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fa-solid fa-award"></i>
+                    </div>
+                    <h3>Café de Calidad</h3>
+                    <p>Granos seleccionados y preparación dedicada para garantizar la mejor experiencia en cada taza.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fa-solid fa-layer-group"></i>
+                    </div>
+                    <h3>Zonificación Clara</h3>
+                    <p>Espacios diferenciados para asegurar tranquilidad a quienes estudian y comodidad a las familias.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fa-solid fa-cookie-bite"></i>
+                    </div>
+                    <h3>Recetas Caseras</h3>
+                    <p>Pastelería y panadería elaborada a diario con ingredientes frescos de primera calidad.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fa-solid fa-face-smile"></i>
+                    </div>
+                    <h3>Atención Cercana</h3>
+                    <p>Un trato amable y familiar para que te sientas como en tu propia casa desde el primer momento.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==========================================================================
+         4. SECCIÓN MENÚ COMPLETO (Nombres cariñosos y originales)
+         ========================================================================== -->
+    <section id="menu" class="section-padding">
+        <div class="container">
+            <div class="section-header reveal">
+                <span class="section-subtitle">SABORES PREPARADOS CON AMOR</span>
+                <h2 class="section-title">Nuestro Menú</h2>
+            </div>
+
+            <!-- Categoría: Cafés -->
+            <div class="menu-category reveal">
+                <div class="category-header">
+                    <i class="fa-solid fa-mug-hot"></i>
+                    <h3>Cafés</h3>
+                </div>
+                <div class="menu-grid">
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <h4>Espresso "El Rinconcito Clásico"</h4>
+                            <p>Café solo, puro e intenso, la base de la casa.</p>
+                        </div>
+                        <div class="item-price">$2.500</div>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <h4>Cortado "Pausa Dulce"</h4>
+                            <p>Espresso con una suave caricia de leche cremosa.</p>
+                        </div>
+                        <div class="item-price">$2.800</div>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <h4>Café con leche "Abrazo Mañanero"</h4>
+                            <p>Clásico, tibio y reconfortante para dar inicio al día.</p>
+                        </div>
+                        <div class="item-price">$3.000</div>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <h4>Capuccino "Nube de Vainilla"</h4>
+                            <p>Espuma suave y alta con un sutil toque dulce.</p>
+                        </div>
+                        <div class="item-price">$3.500</div>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <h4>Latte "Caramelo del Rincón"</h4>
+                            <p>Latte cremoso enriquecido con hilos de caramelo casero.</p>
+                        </div>
+                        <div class="item-price">$3.500</div>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <h4>Café helado "Brisa de la Tarde"</h4>
+                            <p>Refrescante espresso servido con hielo y un Toque de canela.</p>
+                        </div>
+                        <div class="item-price">$3.800</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Categoría: Infusiones -->
+            <div class="menu-category reveal">
+                <div class="category-header">
+                    <i class="fa-solid fa-leaf"></i>
+                    <h3>Infusiones</h3>
+                </div>
+                <div class="menu-grid">
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <h4>Té Verde "Rincón Zen"</h4>
+                            <p>Infusión ligera, digestiva y cargada de antioxidantes.</p>
+                        </div>
+                        <div class="item-price">$2.500</div>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <h4>Manzanilla "Calma en el Alma"</h4>
+                            <p>Flores naturales seleccionadas para regalarte tranquilidad.</p>
+                        </div>
+                        <div class="item-price">$2.500</div>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <h4>Mate Cocido "Tradición de Casa"</h4>
+                            <p>El aroma y sabor de siempre que abraza el corazón.</p>
+                        </div>
+                        <div class="item-price">$2.200</div>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <h4>Té "Secreto de Frutos Rojos"</h4>
+                            <p>Combinación especial de frutos del bosque e hibisco.</p>
+                        </div>
+                        <div class="item-price">$2.700</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Categoría: Desayunos y Meriendas -->
+            <div class="menu-category reveal">
+                <div class="category-header">
+                    <i class="fa-solid fa-sun"></i>
+                    <h3>Desayunos y Meriendas</h3>
+                </div>
+                <div class="menu-grid">
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <h4>Desayuno "Arranque Perfecto"</h4>
+                            <p>Tostadas de pan casero con manteca y dulce + tu café preferido.</p>
+                        </div>
+                        <div class="item-price">$4.500</div>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <h4>Dúo de Medialunas "Doraditas del Rincón"</h4>
+                            <p>Hojaldradas, tibias y recién horneadas.</p>
+                        </div>
+                        <div class="item-price">$2.000</div>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <h4>Tostado "El Clásico Calentito" + Café</h4>
+                            <p>Pan crujiente con abundante jamón y queso derretido.</p>
+                        </div>
+                        <div class="item-price">$5.000</div>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <h4>Bowl "Chispa de Energía"</h4>
+                            <p>Yogur casero, frutas frescas de estación y granola crocante.</p>
+                        </div>
+                        <div class="item-price">$4.200</div>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <h4>Torta "Momento en Familia"</h4>
+                            <p>Una porción generosa elaborada a mano con amor.</p>
+                        </div>
+                        <div class="item-price">$3.200</div>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <h4>Scones "Cariños del Rincón" (x3)</h4>
+                            <p>Tíbios, esponjosos y acompañados de mermelada de la casa.</p>
+                        </div>
+                        <div class="item-price">$2.800</div>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <h4>Budín "Sol de Naranja"</h4>
+                            <p>Esponjoso, aromatizado con cítricos frescos.</p>
+                        </div>
+                        <div class="item-price">$2.500</div>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <h4>Tostado "Dulce Capricho"</h4>
+                            <p>Pan dorado al plato con generoso dulce de leche y queso crema.</p>
+                        </div>
+                        <div class="item-price">$3.000</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Categoría: Dulces y Salados -->
+            <div class="menu-category reveal">
+                <div class="category-header">
+                    <i class="fa-solid fa-bread-slice"></i>
+                    <h3>Dulces & Salados</h3>
+                </div>
+                <div class="menu-grid">
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <h4>Sandwich "El Rinconcito Gourmet"</h4>
+                            <p>Jamón y queso seleccionados en pan artesanal de corteza crujiente.</p>
+                        </div>
+                        <div class="item-price">$4.000</div>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <h4>Brownie "Puro Cacao & Amor"</h4>
+                            <p>Textura húmeda e intensa con nueces seleccionadas.</p>
+                        </div>
+                        <div class="item-price">$2.800</div>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <h4>Tarta "Receta de la Abuela"</h4>
+                            <p>Porción individual casera con relleno rotativo diario.</p>
+                        </div>
+                        <div class="item-price">$3.800</div>
+                    </div>
+                    <div class="menu-item">
+                        <div class="item-info">
+                            <h4>Alfajorcitos "De Maicena y Corazón" (x2)</h4>
+                            <p>Desarmables, suaves y repletos de dulce de leche.</p>
+                        </div>
+                        <div class="item-price">$2.200</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==========================================================================
+         5. SECCIÓN COMBOS & PROMOCIONES (Seguido del Beneficio Especial)
+         ========================================================================== -->
+    <section id="promociones" class="section-padding">
+        <div class="container">
+            <div class="section-header reveal">
+                <span class="section-subtitle" style="color: var(--accent-light);">PROPUESTAS ESPECIALES</span>
+                <h2 class="section-title">Combos & Promociones</h2>
+            </div>
+
+            <div class="promo-container reveal">
+                <!-- Combo Estudiante -->
+                <div class="promo-card">
+                    <div class="promo-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+                    <h3 class="promo-title">Combo Estudiante</h3>
+                    <p class="promo-desc">Café a elección + 1 Medialuna casera + 2 hs garantizadas de mesa con wifi de alta velocidad.</p>
+                    <div class="promo-price">$5.500</div>
+                    <a href="#contacto" class="btn btn-primary">Pedir en Barra</a>
+                </div>
+
+                <!-- Combo Familiar (Estrella) -->
+                <div class="promo-card featured">
+                    <div class="promo-badge">Producto Estrella</div>
+                    <div class="promo-icon"><i class="fa-solid fa-people-roof"></i></div>
+                    <h3 class="promo-title">Combo Familiar</h3>
+                    <p class="promo-desc">2 Meriendas a elección + 2 Bebidas + 1 Juego de mesa a elección para compartir en nuestro rincón.</p>
+                    <div class="promo-price">$9.500</div>
+                    <a href="#contacto" class="btn btn-primary">¡Ideal para Tarde!</a>
+                </div>
+
+                <!-- Combo Desayuno de a Dos -->
+                <div class="promo-card">
+                    <div class="promo-icon"><i class="fa-solid fa-mug-hot"></i></div>
+                    <h3 class="promo-title">Desayuno de a Dos</h3>
+                    <p class="promo-desc">2 Cafés con leche o infusiones + 2 Tostados calientes de jamón y queso.</p>
+                    <div class="promo-price">$8.000</div>
+                    <a href="#contacto" class="btn btn-primary">Compartir</a>
+                </div>
+
+                <!-- Merienda Grupal -->
+                <div class="promo-card">
+                    <div class="promo-icon"><i class="fa-solid fa-users"></i></div>
+                    <h3 class="promo-title">Merienda Grupal</h3>
+                    <p class="promo-desc">Hasta 4 personas: 4 Meriendas + 4 Bebidas + 1 Porción de Torta generosa para compartir.</p>
+                    <div class="promo-price">$16.000</div>
+                    <a href="#contacto" class="btn btn-primary">Para Grupos</a>
+                </div>
+            </div>
+
+            <!-- BENEFICIO ESPECIAL DE LA SEMANA (LUEGO DE LOS COMBOS) -->
+            <div class="loyalty-banner reveal">
+                <div class="loyalty-content">
+                    <h3><i class="fa-solid fa-star" style="color: var(--gold-matte);"></i> Beneficio Especial de la Semana</h3>
+                    <p>• <strong>2x1 en Café:</strong> Todos los martes de 16:00 a 18:00 hs.<br>
+                    • <strong>Descuento Estudiantes:</strong> 15% OFF de Lunes a Jueves presentando carnet o pase estudiantil.<br>
+                    • <strong>Especial Cumpleaños:</strong> ¡Merienda gratis el día de tu cumpleaños presentando DNI!</p>
+                </div>
+                <div>
+                    <a href="#contacto" class="btn btn-primary" style="background: var(--gold-matte); color: var(--primary-dark); font-weight: 600;">Tarjeta Frecuente (6 sellos = 1 gratis)</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==========================================================================
+         6. SECCIÓN HORARIOS & CONTACTO
+         ========================================================================== -->
+    <section id="contacto" class="section-padding">
+        <div class="container">
+            <div class="section-header reveal">
+                <span class="section-subtitle">TE ESPERAMOS EN NUESTRO RINCÓN</span>
+                <h2 class="section-title">Horarios & Contacto</h2>
+            </div>
+
+            <div class="contact-grid reveal">
+                <!-- Información Reorganizada -->
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <div class="contact-icon"><i class="fa-solid fa-clock"></i></div>
+                        <div class="contact-details">
+                            <h4>Horarios de Atención</h4>
+                            <p><strong>Lunes a Domingo:</strong> 08:00 a 20:00 hs</p>
+                            <span class="schedule-badge"><i class="fa-solid fa-circle" style="color:#4caf50; font-size: 0.6rem;"></i> Abierto todos los días</span>
+                        </div>
+                    </div>
+
+                    <div class="contact-item">
+                        <div class="contact-icon"><i class="fa-solid fa-location-dot"></i></div>
+                        <div class="contact-details">
+                            <h4>Ubicación</h4>
+                            <p>Av. Principal 1234, Barrio Norte</p>
+                            <p style="font-size: 0.85rem; color: var(--terracota);">Punto céntrico y accesible con espacio para estacionar.</p>
+                        </div>
+                    </div>
+
+                    <div class="contact-item">
+                        <div class="contact-icon"><i class="fa-brands fa-whatsapp"></i></div>
+                        <div class="contact-details">
+                            <h4>Atención WhatsApp & Pedidos</h4>
+                            <p>+54 9 11 1234-5678</p>
+                            <p style="font-size: 0.82rem; color: var(--text-muted);">Escribinos para consultar la torta del día o hacer tu pedido para retirar.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Caja de Redes Sociales -->
+                <div class="social-box">
+                    <i class="fa-solid fa-heart floating" style="font-size: 2.8rem; color: var(--terracota); margin-bottom: 15px;"></i>
+                    <h3>Sumate a Nuestra Comunidad</h3>
+                    <p>Enterate de nuestras novedades diarias, publicaciones de tips de estudio, promociones y delicias recién salidas del horno.</p>
+                    
+                    <div class="social-links">
+                        <a href="#" target="_blank" class="social-btn" title="Instagram: @rinconycafe (editar enlace real)">
+                            <i class="fa-brands fa-instagram"></i>
+                        </a>
+                        <a href="#" target="_blank" class="social-btn" title="WhatsApp (editar enlace real)">
+                            <i class="fa-brands fa-whatsapp"></i>
+                        </a>
+                        <a href="#" target="_blank" class="social-btn" title="Facebook (editar enlace real)">
+                            <i class="fa-brands fa-facebook-f"></i>
+                        </a>
+                        <a href="#" target="_blank" class="social-btn" title="TikTok (editar enlace real)">
+                            <i class="fa-brands fa-tiktok"></i>
+                        </a>
+                    </div>
+                    <p style="margin-top: 20px; font-size: 0.9rem; color: var(--terracota); font-weight: 600;">
+                        Instagram: @rinconycafe <span style="font-weight:400; color:var(--text-muted);">(editar por el usuario real)</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==========================================================================
+         7. FOOTER
+         ========================================================================== -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 Rincón & Café — Proyecto Escolar de Emprendimiento & IA.</p>
+            <p style="opacity: 0.75; font-size: 0.82rem;">"Un espacio cálido, moderno y acogedor pensado para vos".</p>
+        </div>
+    </footer>
+
+    <!-- Botón flotante Volver Arriba -->
+    <div class="back-to-top" id="backToTopBtn">
+        <i class="fa-solid fa-arrow-up"></i>
+    </div>
+
+    <!-- ==========================================================================
+         8. JAVASCRIPT / INTERACTIVIDAD Y ANIMACIONES
+         ========================================================================== -->
+    <script>
+        // Smooth Scrolling mediante JavaScript para garantizar desplazamiento fluido
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Header scroll effect
+        const header = document.getElementById('main-header');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+
+        // Menú Responsive Móvil
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const navMenu = document.getElementById('nav-menu');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+            const icon = mobileMenuBtn.querySelector('i');
+            if (navMenu.classList.contains('active')) {
+                icon.classList.remove('fa-bars');
+                icon.classList.add('fa-xmark');
+            } else {
+                icon.classList.remove('fa-xmark');
+                icon.classList.add('fa-bars');
+            }
+        });
+
+        // Cerrar menú móvil al hacer clic en un enlace
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                navMenu.classList.remove('active');
+                const icon = mobileMenuBtn.querySelector('i');
+                if (icon) {
+                    icon.classList.remove('fa-xmark');
+                    icon.classList.add('fa-bars');
+                }
+            });
+        });
+
+        // Desplegar/contraer los chips interactivos (Wifi, Insumos, Lectura, Juegos)
+        // Con soporte de teclado (Enter/Espacio) y aria-expanded para lectores de pantalla
+        document.querySelectorAll('.chip-header').forEach(header => {
+            const toggle = () => {
+                const parent = header.parentElement;
+                const isActive = parent.classList.toggle('active');
+                header.setAttribute('aria-expanded', isActive ? 'true' : 'false');
+            };
+            header.addEventListener('click', toggle);
+            header.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    toggle();
+                }
+            });
+        });
+
+        // Animación Reveal al Scroll (IntersectionObserver: más liviano que escuchar "scroll")
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                    revealObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
+
+        document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+        // Botón Volver Arriba
+        const backToTopBtn = document.getElementById('backToTopBtn');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                backToTopBtn.classList.add('active');
+            } else {
+                backToTopBtn.classList.remove('active');
+            }
+        });
+
+        backToTopBtn.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    </script>
+</body>
+</html>
