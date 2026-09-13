@@ -96,15 +96,6 @@ function mostrarLogin() {
     formularioLogin.classList.remove("oculto");
   }
 
-function mostrarLogin() {
-
-  bloqueSinAcceso.classList.remove("oculto");
-  bloqueAdmin.classList.add("oculto");
-
-  if (formularioLogin) {
-    formularioLogin.classList.remove("oculto");
-  }
-
 }
 
 // ============================================
