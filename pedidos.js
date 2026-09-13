@@ -726,37 +726,50 @@ function activarBotonesPedido() {
           elementoPrecio.textContent
         );
 
-      // Crear botón
+// ==========================================
+// CREAR BOTÓN "HACER PEDIDO"
+// ==========================================
 
-      const boton =
-        document.createElement("button");
+const contenedorBoton =
+  document.createElement("div");
 
-      boton.type =
-        "button";
+contenedorBoton.className =
+  "contenedor-boton-pedido";
 
-      boton.className =
-        "boton-hacer-pedido";
+const boton =
+  document.createElement("button");
 
-      boton.innerHTML = `
-        <i class="fa-solid fa-cart-shopping"></i>
-        Hacer pedido
-      `;
+boton.type =
+  "button";
 
-      boton.addEventListener(
-        "click",
-        function () {
+boton.className =
+  "boton-hacer-pedido";
 
-          abrirPedido(
-            nombre,
-            precio
-          );
+boton.innerHTML = `
+  <i class="fa-solid fa-cart-shopping"></i>
+  Hacer pedido
+`;
 
-        }
-      );
+boton.addEventListener(
+  "click",
+  function () {
 
-      producto.appendChild(
-        boton
-      );
+    abrirPedido(
+      nombre,
+      precio
+    );
+
+  }
+);
+
+contenedorBoton.appendChild(
+  boton
+);
+
+// Agregar el botón debajo de todo el producto
+producto.appendChild(
+  contenedorBoton
+);
 
     }
   );
