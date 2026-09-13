@@ -7,12 +7,16 @@ import {
   auth,
   db,
   onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signOut,
   collection,
   onSnapshot,
   updateDoc,
   deleteDoc,
   doc
 } from "./firebase-init.js";
+
+import { ADMIN_EMAIL } from "./firebase-config.js";
 
 // ============================================
 // ELEMENTOS DEL HTML
@@ -21,6 +25,13 @@ import {
 const bloqueSinAcceso = document.getElementById("bloque-sin-acceso");
 const bloqueAdmin = document.getElementById("bloque-admin");
 
+const formularioLogin = document.getElementById("formulario-login");
+const inputEmail = document.getElementById("login-email");
+const inputPassword = document.getElementById("login-password");
+const mensajeLogin = document.getElementById("mensaje-login");
+
+const botonCerrarSesion = document.getElementById("btn-cerrar-sesion");
+
 const resumenTotal = document.getElementById("resumen-total");
 const resumenPendientes = document.getElementById("resumen-pendientes");
 const resumenPreparando = document.getElementById("resumen-preparando");
@@ -28,10 +39,6 @@ const resumenListos = document.getElementById("resumen-listos");
 
 const listaPedidos = document.getElementById("lista-pedidos");
 const estadoConexion = document.getElementById("estado-conexion");
-
-// ============================================
-// PEDIDOS CARGADOS
-// ============================================
 
 let pedidos = [];
 
@@ -43,91 +50,216 @@ onAuthStateChanged(auth, (usuario) => {
 
   if (!usuario) {
 
-    bloqueSinAcceso.classList.remove("oculto");
-    bloqueAdmin.classList.add("oculto");
+    mostrarLogin();
 
     return;
   }
 
-  // Usuario autenticado
-  bloqueSinAcceso.classList.add("oculto");
+  // ==========================================
+  // COMPROBAR QUE SEA EL ADMINISTRADOR
+  // ==========================================
+
+  if (usuario.email !== ADMIN_EMAIL) {
+
+    signOut(auth);
+
+    mostrarLogin();
+
+    mensajeLogin.textContent =
+      "Esta cuenta no tiene permiso para acceder al panel.";
+
+    mensajeLogin.style.color = "#b94a48";
+
+    return;
+  }
+
+  // ==========================================
+  // ADMINISTRADOR CORRECTO
+  // ==========================================
+
+  ocultarLogin();
+
   bloqueAdmin.classList.remove("oculto");
 
   escucharPedidos();
 });
 
 // ============================================
-// ESCUCHAR PEDIDOS DE FIRESTORE
+// MOSTRAR LOGIN
+// ============================================
+
+function mostrarLogin() {
+
+  bloqueSinAcceso.classList.remove("oculto");
+  bloqueAdmin.classList.add("oculto");
+
+  if (formularioLogin) {
+    formularioLogin.classList.remove("oculto");
+  }
+
+  if (inputEmail) {
+    inputEmail.value = ADMIN_EMAIL;
+  }
+
+}
+
+// ============================================
+// OCULTAR LOGIN
+// ============================================
+
+function ocultarLogin() {
+
+  bloqueSinAcceso.classList.add("oculto");
+
+  if (formularioLogin) {
+    formularioLogin.classList.add("oculto");
+  }
+
+}
+
+// ============================================
+// INICIAR SESIÓN
+// ============================================
+
+if (formularioLogin) {
+
+  formularioLogin.addEventListener("submit", async (evento) => {
+
+    evento.preventDefault();
+
+    const email = inputEmail.value.trim();
+    const password = inputPassword.value;
+
+    if (!email || !password) {
+
+      mensajeLogin.textContent =
+        "Ingresá el correo y la contraseña.";
+
+      mensajeLogin.style.color = "#b94a48";
+
+      return;
+    }
+
+    try {
+
+      mensajeLogin.textContent =
+        "Iniciando sesión...";
+
+      mensajeLogin.style.color = "#6f4e37";
+
+      await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+
+      inputPassword.value = "";
+
+    } catch (error) {
+
+      console.error(
+        "Error al iniciar sesión:",
+        error
+      );
+
+      mensajeLogin.textContent =
+        "Correo o contraseña incorrectos.";
+
+      mensajeLogin.style.color = "#b94a48";
+
+    }
+
+  });
+
+}
+
+// ============================================
+// CERRAR SESIÓN
+// ============================================
+
+if (botonCerrarSesion) {
+
+  botonCerrarSesion.addEventListener(
+    "click",
+    async () => {
+
+      try {
+
+        await signOut(auth);
+
+      } catch (error) {
+
+        console.error(
+          "Error al cerrar sesión:",
+          error
+        );
+
+      }
+
+    }
+  );
+
+}
+
+// ============================================
+// ESCUCHAR PEDIDOS
 // ============================================
 
 function escucharPedidos() {
 
-  try {
+  const referenciaPedidos =
+    collection(db, "pedidos");
 
-    const referenciaPedidos = collection(db, "pedidos");
+  onSnapshot(
+    referenciaPedidos,
 
-    onSnapshot(
-      referenciaPedidos,
+    (snapshot) => {
 
-      (snapshot) => {
+      pedidos = [];
 
-        pedidos = [];
+      snapshot.forEach((documento) => {
 
-        snapshot.forEach((documento) => {
-
-          pedidos.push({
-            id: documento.id,
-            ...documento.data()
-          });
-
+        pedidos.push({
+          id: documento.id,
+          ...documento.data()
         });
 
-        // Ordenar del más nuevo al más antiguo
-        pedidos.sort((a, b) => {
+      });
 
-          const fechaA = a.fecha
-            ? new Date(a.fecha).getTime()
-            : 0;
+      pedidos.sort((a, b) => {
 
-          const fechaB = b.fecha
-            ? new Date(b.fecha).getTime()
-            : 0;
+        const fechaA = a.fecha
+          ? new Date(a.fecha).getTime()
+          : 0;
 
-          return fechaB - fechaA;
+        const fechaB = b.fecha
+          ? new Date(b.fecha).getTime()
+          : 0;
 
-        });
+        return fechaB - fechaA;
 
-        estadoConexion.textContent = "● Conectado en tiempo real";
+      });
 
-        renderizarResumen();
-        renderizarPedidos();
+      estadoConexion.textContent =
+        "● Conectado en tiempo real";
 
-      },
+      renderizarResumen();
+      renderizarPedidos();
 
-      (error) => {
+    },
 
-        console.error("Error al escuchar pedidos:", error);
+    (error) => {
 
-        estadoConexion.textContent =
-          "● Error de conexión";
+      console.error(
+        "Error al escuchar pedidos:",
+        error
+      );
 
-        listaPedidos.innerHTML = `
-          <div class="sin-pedidos">
-            <h3>⚠️ No se pudieron cargar los pedidos</h3>
-            <p>
-              Revisá la consola del navegador para ver el error.
-            </p>
-          </div>
-        `;
+      estadoConexion.textContent =
+        "● Error de conexión";
 
-      }
-    );
-
-  } catch (error) {
-
-    console.error("Error iniciando pedidos:", error);
-
-  }
+    }
+  );
 
 }
 
@@ -137,24 +269,24 @@ function escucharPedidos() {
 
 function renderizarResumen() {
 
-  const total = pedidos.length;
+  resumenTotal.textContent =
+    pedidos.length;
 
-  const pendientes = pedidos.filter(
-    (pedido) => pedido.estado === "Pendiente"
-  ).length;
+  resumenPendientes.textContent =
+    pedidos.filter(
+      pedido => pedido.estado === "Pendiente"
+    ).length;
 
-  const preparando = pedidos.filter(
-    (pedido) => pedido.estado === "Preparando"
-  ).length;
+  resumenPreparando.textContent =
+    pedidos.filter(
+      pedido => pedido.estado === "Preparando"
+    ).length;
 
-  const listos = pedidos.filter(
-    (pedido) => pedido.estado === "Listo"
-  ).length;
+  resumenListos.textContent =
+    pedidos.filter(
+      pedido => pedido.estado === "Listo"
+    ).length;
 
-  resumenTotal.textContent = total;
-  resumenPendientes.textContent = pendientes;
-  resumenPreparando.textContent = preparando;
-  resumenListos.textContent = listos;
 }
 
 // ============================================
@@ -182,36 +314,44 @@ function renderizarPedidos() {
   }
 
   listaPedidos.innerHTML = pedidos
-    .map((pedido) => crearTarjetaPedido(pedido))
+    .map(pedido => crearTarjetaPedido(pedido))
     .join("");
+
 }
 
 // ============================================
-// CREAR TARJETA DE PEDIDO
+// CREAR TARJETA
 // ============================================
 
 function crearTarjetaPedido(pedido) {
 
-  const estado = pedido.estado || "Pendiente";
+  const estado =
+    pedido.estado || "Pendiente";
 
-  const claseEstado = obtenerClaseEstado(estado);
+  const claseEstado =
+    obtenerClaseEstado(estado);
 
-  const fecha = pedido.fecha
-    ? formatearFecha(pedido.fecha)
-    : "Fecha no disponible";
+  const fecha =
+    pedido.fecha
+      ? formatearFecha(pedido.fecha)
+      : "Fecha no disponible";
 
-  const productos = Array.isArray(pedido.productos)
-    ? pedido.productos
-    : [];
+  const productos =
+    Array.isArray(pedido.productos)
+      ? pedido.productos
+      : [];
 
-  const productosHTML = productos
-    .map((producto) => {
+  const productosHTML =
+    productos.map(producto => {
 
-      const nombre = producto.nombre || "Producto";
+      const nombre =
+        producto.nombre || "Producto";
 
-      const cantidad = Number(producto.cantidad) || 0;
+      const cantidad =
+        Number(producto.cantidad) || 0;
 
-      const precio = Number(producto.precio) || 0;
+      const precio =
+        Number(producto.precio) || 0;
 
       const subtotal =
         Number(producto.subtotal) ||
@@ -221,6 +361,7 @@ function crearTarjetaPedido(pedido) {
         <div class="producto-linea">
 
           <div>
+
             <div class="producto-nombre">
               ${escaparHTML(nombre)}
             </div>
@@ -228,6 +369,7 @@ function crearTarjetaPedido(pedido) {
             <div class="producto-detalle">
               ${cantidad} × ${formatearPrecio(precio)}
             </div>
+
           </div>
 
           <div class="producto-subtotal">
@@ -237,22 +379,22 @@ function crearTarjetaPedido(pedido) {
         </div>
       `;
 
-    })
-    .join("");
+    }).join("");
 
-  const observaciones = pedido.observaciones
-    ? `
-      <div class="pedido-observaciones">
+  const observaciones =
+    pedido.observaciones
+      ? `
+        <div class="pedido-observaciones">
 
-        <strong>📝 Observaciones</strong>
+          <strong>📝 Observaciones</strong>
 
-        <p>
-          ${escaparHTML(pedido.observaciones)}
-        </p>
+          <p>
+            ${escaparHTML(pedido.observaciones)}
+          </p>
 
-      </div>
-    `
-    : "";
+        </div>
+      `
+      : "";
 
   return `
     <article class="pedido-card">
@@ -277,7 +419,6 @@ function crearTarjetaPedido(pedido) {
 
       </div>
 
-
       <div class="pedido-datos">
 
         <div class="dato">
@@ -287,11 +428,12 @@ function crearTarjetaPedido(pedido) {
           </span>
 
           <span class="dato-valor">
-            ${escaparHTML(pedido.nombre || "Sin nombre")}
+            ${escaparHTML(
+              pedido.nombre || "Sin nombre"
+            )}
           </span>
 
         </div>
-
 
         <div class="dato">
 
@@ -300,11 +442,12 @@ function crearTarjetaPedido(pedido) {
           </span>
 
           <span class="dato-valor">
-            ${escaparHTML(pedido.whatsapp || "No indicado")}
+            ${escaparHTML(
+              pedido.whatsapp || "No indicado"
+            )}
           </span>
 
         </div>
-
 
         <div class="dato">
 
@@ -313,40 +456,34 @@ function crearTarjetaPedido(pedido) {
           </span>
 
           <span class="dato-valor">
-            ${escaparHTML(pedido.sector || "No indicado")}
+            ${escaparHTML(
+              pedido.sector || "No indicado"
+            )}
           </span>
 
         </div>
 
       </div>
 
-
       <div class="pedido-productos">
 
-        <h3>
-          🛒 Productos
-        </h3>
+        <h3>🛒 Productos</h3>
 
         ${productosHTML}
 
       </div>
 
-
       ${observaciones}
-
 
       <div class="pedido-total">
 
-        <span>
-          Total
-        </span>
+        <span>Total</span>
 
         <strong>
           ${formatearPrecio(pedido.total)}
         </strong>
 
       </div>
-
 
       <div class="pedido-acciones">
 
@@ -389,87 +526,93 @@ function crearTarjetaPedido(pedido) {
 
     </article>
   `;
+
 }
 
 // ============================================
 // CAMBIAR ESTADO
 // ============================================
 
-window.cambiarEstadoPedido = async function (id, nuevoEstado) {
+window.cambiarEstadoPedido =
+  async function (id, nuevoEstado) {
 
-  try {
+    try {
 
-    await updateDoc(
-      doc(db, "pedidos", id),
-      {
-        estado: nuevoEstado
-      }
-    );
+      await updateDoc(
+        doc(db, "pedidos", id),
+        {
+          estado: nuevoEstado
+        }
+      );
 
-    console.log(
-      `Pedido actualizado a: ${nuevoEstado}`
-    );
+    } catch (error) {
 
-  } catch (error) {
+      console.error(
+        "Error al cambiar estado:",
+        error
+      );
 
-    console.error(
-      "Error al cambiar estado:",
-      error
-    );
+      alert(
+        "No se pudo cambiar el estado."
+      );
 
-    alert(
-      "No se pudo cambiar el estado del pedido."
-    );
+    }
 
-  }
-
-};
+  };
 
 // ============================================
 // ELIMINAR PEDIDO
 // ============================================
 
-window.eliminarPedido = async function (id) {
+window.eliminarPedido =
+  async function (id) {
 
-  const confirmar = confirm(
-    "¿Seguro que querés eliminar este pedido?\n\nEsta acción no se puede deshacer."
-  );
+    if (
+      !confirm(
+        "¿Seguro que querés eliminar este pedido?"
+      )
+    ) {
+      return;
+    }
 
-  if (!confirmar) {
-    return;
-  }
+    try {
 
-  try {
+      await deleteDoc(
+        doc(db, "pedidos", id)
+      );
 
-    await deleteDoc(
-      doc(db, "pedidos", id)
-    );
+    } catch (error) {
 
-  } catch (error) {
+      console.error(
+        "Error al eliminar pedido:",
+        error
+      );
 
-    console.error(
-      "Error al eliminar pedido:",
-      error
-    );
+      alert(
+        "No se pudo eliminar el pedido."
+      );
 
-    alert(
-      "No se pudo eliminar el pedido."
-    );
+    }
 
-  }
-
-};
+  };
 
 // ============================================
-// FORMATEAR FECHA
+// FECHA
 // ============================================
 
 function formatearFecha(fecha) {
 
-  const fechaObjeto = new Date(fecha);
+  const fechaObjeto =
+    new Date(fecha);
 
-  if (isNaN(fechaObjeto.getTime())) {
+  if (
+    isNaN(
+      fechaObjeto.getTime()
+    )
+  ) {
+
     return "Fecha no válida";
+
   }
 
   return fechaObjeto.toLocaleString(
@@ -483,7 +626,7 @@ function formatearFecha(fecha) {
 }
 
 // ============================================
-// FORMATEAR PRECIO
+// PRECIO
 // ============================================
 
 function formatearPrecio(valor) {
@@ -495,7 +638,9 @@ function formatearPrecio(valor) {
       currency: "ARS",
       maximumFractionDigits: 0
     }
-  ).format(Number(valor) || 0);
+  ).format(
+    Number(valor) || 0
+  );
 
 }
 
@@ -524,12 +669,13 @@ function obtenerClaseEstado(estado) {
 
     default:
       return "estado-pendiente";
+
   }
 
 }
 
 // ============================================
-// EVITAR HTML INYECTADO
+// SEGURIDAD HTML
 // ============================================
 
 function escaparHTML(texto) {
