@@ -26,7 +26,6 @@ const bloqueSinAcceso = document.getElementById("bloque-sin-acceso");
 const bloqueAdmin = document.getElementById("bloque-admin");
 
 const formularioLogin = document.getElementById("formulario-login");
-const inputEmail = document.getElementById("login-email");
 const inputPassword = document.getElementById("login-password");
 const mensajeLogin = document.getElementById("mensaje-login");
 
@@ -97,8 +96,13 @@ function mostrarLogin() {
     formularioLogin.classList.remove("oculto");
   }
 
-  if (inputEmail) {
-    inputEmail.value = ADMIN_EMAIL;
+function mostrarLogin() {
+
+  bloqueSinAcceso.classList.remove("oculto");
+  bloqueAdmin.classList.add("oculto");
+
+  if (formularioLogin) {
+    formularioLogin.classList.remove("oculto");
   }
 
 }
@@ -127,13 +131,12 @@ if (formularioLogin) {
 
     evento.preventDefault();
 
-    const email = inputEmail.value.trim();
     const password = inputPassword.value;
 
-    if (!email || !password) {
+    if (!password) {
 
       mensajeLogin.textContent =
-        "Ingresá el correo y la contraseña.";
+        "Ingresá la contraseña.";
 
       mensajeLogin.style.color = "#b94a48";
 
@@ -149,11 +152,12 @@ if (formularioLogin) {
 
       await signInWithEmailAndPassword(
         auth,
-        email,
+        ADMIN_EMAIL,
         password
       );
 
       inputPassword.value = "";
+      mensajeLogin.textContent = "";
 
     } catch (error) {
 
@@ -163,7 +167,7 @@ if (formularioLogin) {
       );
 
       mensajeLogin.textContent =
-        "Correo o contraseña incorrectos.";
+        "Contraseña incorrecta.";
 
       mensajeLogin.style.color = "#b94a48";
 
@@ -172,7 +176,6 @@ if (formularioLogin) {
   });
 
 }
-
 // ============================================
 // CERRAR SESIÓN
 // ============================================
