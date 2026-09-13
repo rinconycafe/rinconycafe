@@ -973,6 +973,67 @@ function activarBotonesPedido() {
 
 }
 
+// ============================================
+// ACTIVAR BOTONES DE COMBOS Y PROMOCIONES
+// ============================================
+
+function activarBotonesPromociones() {
+
+  const promociones =
+    document.querySelectorAll(".promo-card");
+
+  promociones.forEach((promocion) => {
+
+    const elementoNombre =
+      promocion.querySelector(".promo-title");
+
+    const elementoPrecio =
+      promocion.querySelector(".promo-price");
+
+    const boton =
+      promocion.querySelector(".btn");
+
+    if (!elementoNombre || !elementoPrecio || !boton) {
+      return;
+    }
+
+    const nombre =
+      elementoNombre.textContent.trim();
+
+    const precioTexto =
+      elementoPrecio.textContent.trim();
+
+    const precio =
+      Number(
+        precioTexto.replace(/[^\d]/g, "")
+      );
+
+    if (!precio || precio <= 0) {
+      return;
+    }
+
+    // Evitar que el botón lleve a Horarios y contacto
+    boton.removeAttribute("href");
+
+    // Cambiar el texto del botón
+    boton.innerHTML =
+      '<i class="fa-solid fa-cart-shopping"></i> Hacer pedido';
+
+    // Abrir la ventana de pedido
+    boton.addEventListener("click", (event) => {
+
+      event.preventDefault();
+
+      abrirPedido(
+        nombre,
+        precio
+      );
+
+    });
+
+  });
+
+}
 
 // ============================================
 // ACTIVAR BOTONES
@@ -980,6 +1041,7 @@ function activarBotonesPedido() {
 
 activarBotonesPedido();
 
+activarBotonesPromociones();
 
 // ============================================
 // EXPORTAR FUNCIÓN
@@ -987,5 +1049,6 @@ activarBotonesPedido();
 
 export {
   abrirPedido,
-  activarBotonesPedido
+  activarBotonesPedido,
+  activarBotonesPromociones
 };
