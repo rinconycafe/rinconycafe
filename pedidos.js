@@ -1002,9 +1002,9 @@ function activarBotonesPedido() {
     );
 
 
-    // Agregar botón debajo del precio
+    // Agregar botón debajo del nombre y descripción
 
-    elementoPrecio.appendChild(boton);
+    elementoNombre.parentElement.appendChild(boton);
 
   });
 
