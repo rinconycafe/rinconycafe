@@ -768,16 +768,18 @@ header.scrolled .navbar {
 }
 
 .menu-item {
-  background-color: var(--bg-card);
-  padding: 22px;
-  border-radius: var(--radius-md);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  transition: var(--transition);
-  border-left: 4px solid transparent;
-  position: relative;
+background-color: var(--bg-card);
+padding: 22px;
+border-radius: var(--radius-md);
+box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+display: flex;
+flex-wrap: wrap;
+justify-content: space-between;
+align-items: center;
+gap: 10px;
+transition: var(--transition);
+border-left: 4px solid transparent;
+position: relative;
 }
 
 .menu-item:hover {
@@ -1311,27 +1313,6 @@ footer p {
   opacity: 0.6;
   cursor: wait;
   transform: none;
-}
-
-/* BOTÓN HACER PEDIDO */
-
-.boton-hacer-pedido {
-  margin-top: 10px;
-  width: 100%;
-  border: none;
-  border-radius: 8px;
-  padding: 10px 14px;
-  background: #c86d51;
-  color: white;
-  font-family: inherit;
-  font-weight: 700;
-  cursor: pointer;
-  transition: 0.2s ease;
-}
-
-.boton-hacer-pedido:hover {
-  background: #b85d43;
-  transform: translateY(-1px);
 }
 
 /* ==========================================================================
