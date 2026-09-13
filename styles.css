@@ -1431,3 +1431,37 @@ footer p {
     font-size: 1.1rem;
   }
 }
+/* ============================================
+   BOTÓN HACER PEDIDO
+   ============================================ */
+
+.contenedor-boton-pedido {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 14px;
+  grid-column: 1 / -1;
+}
+
+.boton-hacer-pedido {
+  width: 100%;
+  max-width: 260px;
+  padding: 11px 18px;
+  border: none;
+  border-radius: 10px;
+  background: var(--primary, #8b5e3c);
+  color: white;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.boton-hacer-pedido:hover {
+  transform: translateY(-2px);
+  opacity: 0.9;
+}
+
+.boton-hacer-pedido i {
+  margin-right: 6px;
+}
