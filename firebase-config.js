@@ -14,3 +14,4 @@ const firebaseConfig = {
 };
 
 export default firebaseConfig;
+export const ADMIN_EMAIL = "rinconycafe@gmail.com";
