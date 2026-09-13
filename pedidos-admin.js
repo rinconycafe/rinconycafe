@@ -14,10 +14,6 @@ import {
   doc
 } from "./firebase-init.js";
 
-import {
-  ADMIN_EMAIL
-} from "./firebase-config.js";
-
 
 // ============================================
 // VARIABLES
@@ -60,6 +56,10 @@ onAuthStateChanged(
   auth,
   function (user) {
 
+    // ----------------------------------------
+    // NO HAY USUARIO INICIADO
+    // ----------------------------------------
+
     if (!user) {
 
       bloqueSinAcceso.classList.remove(
@@ -74,30 +74,9 @@ onAuthStateChanged(
     }
 
 
-    if (
-      user.email !== ADMIN_EMAIL
-    ) {
-
-      bloqueSinAcceso.classList.remove(
-        "oculto"
-      );
-
-      bloqueAdmin.classList.add(
-        "oculto"
-      );
-
-      console.warn(
-        "Usuario sin permisos:",
-        user.email
-      );
-
-      return;
-    }
-
-
-    // ========================================
-    // ADMINISTRADOR AUTORIZADO
-    // ========================================
+    // ----------------------------------------
+    // USUARIO AUTENTICADO
+    // ----------------------------------------
 
     bloqueSinAcceso.classList.add(
       "oculto"
@@ -108,6 +87,7 @@ onAuthStateChanged(
     );
 
 
+    // Empezar a escuchar pedidos
     escucharPedidos();
   }
 );
@@ -146,9 +126,9 @@ function escucharPedidos() {
       );
 
 
-      // ======================================
+      // --------------------------------------
       // ORDENAR DEL MÁS NUEVO AL MÁS VIEJO
-      // ======================================
+      // --------------------------------------
 
       pedidos.sort(
         function (a, b) {
@@ -164,10 +144,13 @@ function escucharPedidos() {
       );
 
 
+      // --------------------------------------
+      // ACTUALIZAR PANTALLA
+      // --------------------------------------
+
       mostrarPedidos();
 
       actualizarResumen();
-
     },
 
 
@@ -178,6 +161,7 @@ function escucharPedidos() {
         error
       );
 
+
       listaPedidos.innerHTML = `
         <div class="sin-pedidos">
 
@@ -186,8 +170,13 @@ function escucharPedidos() {
           </h3>
 
           <p>
-            Revisá la conexión con Firebase
-            y las reglas de Firestore.
+            Ocurrió un error al conectar con
+            la colección "pedidos" de Firebase.
+          </p>
+
+          <p>
+            Revisá la consola del navegador
+            para ver más información.
           </p>
 
         </div>
@@ -208,7 +197,7 @@ function obtenerFecha(fecha) {
   }
 
 
-  // Si es Timestamp de Firebase
+  // Timestamp de Firebase
 
   if (
     typeof fecha.toDate === "function"
@@ -218,7 +207,7 @@ function obtenerFecha(fecha) {
   }
 
 
-  // Si es Date
+  // Date normal
 
   if (
     fecha instanceof Date
@@ -228,7 +217,7 @@ function obtenerFecha(fecha) {
   }
 
 
-  // Si es texto ISO
+  // Texto / ISO
 
   const fechaConvertida =
     new Date(fecha);
@@ -321,7 +310,7 @@ function escaparHTML(texto) {
 
 
 // ============================================
-// ESTADO DEL PEDIDO
+// OBTENER CLASE DEL ESTADO
 // ============================================
 
 function obtenerClaseEstado(estado) {
@@ -355,6 +344,10 @@ function obtenerClaseEstado(estado) {
 
 function mostrarPedidos() {
 
+  // ----------------------------------------
+  // NO HAY PEDIDOS
+  // ----------------------------------------
+
   if (
     pedidos.length === 0
   ) {
@@ -378,6 +371,10 @@ function mostrarPedidos() {
   }
 
 
+  // ----------------------------------------
+  // CREAR LAS TARJETAS
+  // ----------------------------------------
+
   listaPedidos.innerHTML =
     pedidos
       .map(
@@ -390,6 +387,8 @@ function mostrarPedidos() {
       )
       .join("");
 
+
+  // Activar botones
 
   agregarEventosPedidos();
 }
@@ -411,19 +410,22 @@ function crearPedidoHTML(pedido) {
 
   const nombreCliente =
     escaparHTML(
-      pedido.nombre || "Sin nombre"
+      pedido.nombre ||
+      "Sin nombre"
     );
 
 
   const whatsapp =
     escaparHTML(
-      pedido.whatsapp || "Sin teléfono"
+      pedido.whatsapp ||
+      "Sin teléfono"
     );
 
 
   const sector =
     escaparHTML(
-      pedido.sector || "Sin sector"
+      pedido.sector ||
+      "Sin sector"
     );
 
 
@@ -537,7 +539,17 @@ function crearPedidoHTML(pedido) {
 
 
   // ========================================
-  // BOTONES
+  // ID CORTO DEL PEDIDO
+  // ========================================
+
+  const idCorto =
+    pedido.id
+      ? pedido.id.substring(0, 6)
+      : "------";
+
+
+  // ========================================
+  // HTML COMPLETO
   // ========================================
 
   return `
@@ -553,9 +565,7 @@ function crearPedidoHTML(pedido) {
         <div>
 
           <h3 class="pedido-numero">
-            Pedido #${escaparHTML(
-              pedido.id.substring(0, 6)
-            )}
+            Pedido #${escaparHTML(idCorto)}
           </h3>
 
           <div class="pedido-fecha">
@@ -717,10 +727,14 @@ function crearPedidoHTML(pedido) {
 
 
 // ============================================
-// EVENTOS DE LOS BOTONES
+// ACTIVAR BOTONES
 // ============================================
 
 function agregarEventosPedidos() {
+
+  // ----------------------------------------
+  // BOTONES DE ESTADO
+  // ----------------------------------------
 
   const botonesEstado =
     document.querySelectorAll(
@@ -750,6 +764,10 @@ function agregarEventosPedidos() {
     }
   );
 
+
+  // ----------------------------------------
+  // BOTONES ELIMINAR
+  // ----------------------------------------
 
   const botonesEliminar =
     document.querySelectorAll(
@@ -787,7 +805,9 @@ async function cambiarEstado(
   const pedido =
     pedidos.find(
       function (item) {
+
         return item.id === id;
+
       }
     );
 
@@ -796,6 +816,9 @@ async function cambiarEstado(
     return;
   }
 
+
+  // Si ya tiene ese estado,
+  // no hacemos nada.
 
   if (
     pedido.estado === nuevoEstado
@@ -820,14 +843,15 @@ async function cambiarEstado(
 
 
     console.log(
-      "Estado actualizado:",
+      "Pedido actualizado:",
+      id,
       nuevoEstado
     );
 
   } catch (error) {
 
     console.error(
-      "Error al cambiar estado:",
+      "Error al cambiar el estado:",
       error
     );
 
@@ -848,7 +872,9 @@ async function eliminarPedido(id) {
   const pedido =
     pedidos.find(
       function (item) {
+
         return item.id === id;
+
       }
     );
 
@@ -897,7 +923,7 @@ async function eliminarPedido(id) {
   } catch (error) {
 
     console.error(
-      "Error al eliminar pedido:",
+      "Error al eliminar el pedido:",
       error
     );
 
@@ -922,10 +948,12 @@ function actualizarResumen() {
   const pendientes =
     pedidos.filter(
       function (pedido) {
+
         return (
           (pedido.estado || "Pendiente") ===
           "Pendiente"
         );
+
       }
     ).length;
 
@@ -933,10 +961,12 @@ function actualizarResumen() {
   const preparando =
     pedidos.filter(
       function (pedido) {
+
         return (
           pedido.estado ===
           "Preparando"
         );
+
       }
     ).length;
 
@@ -944,10 +974,12 @@ function actualizarResumen() {
   const listos =
     pedidos.filter(
       function (pedido) {
+
         return (
           pedido.estado ===
           "Listo"
         );
+
       }
     ).length;
 
