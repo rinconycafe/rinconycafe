@@ -838,52 +838,173 @@ function mostrarMensaje(texto, tipo) {
 
 
 // ============================================
-// BOTONES "HACER PEDIDO"
+// CREAR AUTOMÁTICAMENTE LOS BOTONES
+// "HACER PEDIDO"
 // ============================================
-//
-// Buscamos elementos que tengan:
-// data-pedido-nombre
-// data-pedido-precio
-//
-// Más adelante agregaremos estos atributos
-// a los productos de index.html.
-//
 
 function activarBotonesPedido() {
 
-  const botones =
-    document.querySelectorAll(
-      "[data-pedido-nombre][data-pedido-precio]"
-    );
+  const productos =
+    document.querySelectorAll(".menu-item");
 
 
-  botones.forEach((boton) => {
+  productos.forEach((producto) => {
 
-    // Evitar registrar el evento dos veces
+    // Buscar nombre y precio del producto
 
-    if (boton.dataset.pedidoActivado === "true") {
+    const elementoNombre =
+      producto.querySelector(".item-info h4");
+
+    const elementoPrecio =
+      producto.querySelector(".item-price");
+
+
+    // Si no tiene nombre o precio,
+    // no hacemos nada
+
+    if (!elementoNombre || !elementoPrecio) {
       return;
     }
 
 
-    boton.dataset.pedidoActivado = "true";
+    // Evitar crear el botón dos veces
+
+    if (
+      producto.querySelector(".boton-hacer-pedido")
+    ) {
+      return;
+    }
 
 
-    boton.addEventListener("click", () => {
-
-      const nombre =
-        boton.dataset.pedidoNombre;
-
-      const precio =
-        boton.dataset.pedidoPrecio;
+    const nombre =
+      elementoNombre.textContent.trim();
 
 
-      abrirPedido(
-        nombre,
-        precio
+    // Convertir "$2.500" en 2500
+
+    const precioTexto =
+      elementoPrecio.textContent.trim();
+
+
+    const precio =
+      Number(
+        precioTexto.replace(/[^\d]/g, "")
       );
 
-    });
+
+    if (!precio || precio <= 0) {
+      return;
+    }
+
+
+    // Crear botón
+
+    const boton =
+      document.createElement("button");
+
+
+    boton.type = "button";
+
+    boton.className =
+      "boton-hacer-pedido";
+
+
+    boton.textContent =
+      "Hacer pedido";
+
+
+    // Guardar datos del producto
+
+    boton.dataset.pedidoNombre =
+      nombre;
+
+    boton.dataset.pedidoPrecio =
+      precio;
+
+
+    // Estilos del botón
+
+    boton.style.marginTop = "10px";
+
+    boton.style.padding =
+      "9px 16px";
+
+    boton.style.border =
+      "none";
+
+    boton.style.borderRadius =
+      "8px";
+
+    boton.style.background =
+      "#c86d51";
+
+    boton.style.color =
+      "#ffffff";
+
+    boton.style.fontFamily =
+      "inherit";
+
+    boton.style.fontSize =
+      "0.88rem";
+
+    boton.style.fontWeight =
+      "600";
+
+    boton.style.cursor =
+      "pointer";
+
+    boton.style.transition =
+      "all 0.2s ease";
+
+
+    // Efecto al pasar el mouse
+
+    boton.addEventListener(
+      "mouseenter",
+      () => {
+
+        boton.style.transform =
+          "translateY(-2px)";
+
+        boton.style.opacity =
+          "0.9";
+
+      }
+    );
+
+
+    boton.addEventListener(
+      "mouseleave",
+      () => {
+
+        boton.style.transform =
+          "translateY(0)";
+
+        boton.style.opacity =
+          "1";
+
+      }
+    );
+
+
+    // Abrir ventana de pedido
+
+    boton.addEventListener(
+      "click",
+      () => {
+
+        abrirPedido(
+          nombre,
+          precio
+        );
+
+      }
+    );
+
+
+    // Agregar botón debajo del precio
+
+    elementoPrecio.appendChild(boton);
 
   });
 
