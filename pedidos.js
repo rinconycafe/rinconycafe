@@ -52,7 +52,6 @@ function crearModalPedido() {
 
       </div>
 
-
       <div class="pedido-contenido">
 
         <!-- PRODUCTO -->
@@ -68,7 +67,6 @@ function crearModalPedido() {
           </p>
 
         </div>
-
 
         <!-- CANTIDAD -->
 
@@ -87,7 +85,6 @@ function crearModalPedido() {
 
         </div>
 
-
         <!-- NOMBRE -->
 
         <div class="pedido-campo">
@@ -105,7 +102,6 @@ function crearModalPedido() {
 
         </div>
 
-
         <!-- WHATSAPP -->
 
         <div class="pedido-campo">
@@ -122,7 +118,6 @@ function crearModalPedido() {
           >
 
         </div>
-
 
         <!-- SECTOR -->
 
@@ -154,7 +149,6 @@ function crearModalPedido() {
 
         </div>
 
-
         <!-- OBSERVACIONES -->
 
         <div class="pedido-campo">
@@ -172,7 +166,6 @@ function crearModalPedido() {
 
         </div>
 
-
         <!-- TOTAL -->
 
         <div class="pedido-total">
@@ -186,7 +179,6 @@ function crearModalPedido() {
           </strong>
 
         </div>
-
 
         <!-- BOTONES -->
 
@@ -218,7 +210,6 @@ function crearModalPedido() {
 
   document.body.appendChild(overlay);
 
-
   // ==========================================
   // VARIABLES DEL MODAL
   // ==========================================
@@ -244,7 +235,6 @@ function crearModalPedido() {
   const botonConfirmar =
     document.getElementById("pedido-confirmar");
 
-
   // ==========================================
   // ACTUALIZAR TOTAL
   // ==========================================
@@ -267,12 +257,10 @@ function crearModalPedido() {
       formatearPrecio(total);
   }
 
-
   inputCantidad.addEventListener(
     "input",
     actualizarTotal
   );
-
 
   // ==========================================
   // CERRAR MODAL
@@ -282,17 +270,10 @@ function crearModalPedido() {
 
     overlay.remove();
 
-    const estilosModal =
-      document.getElementById(
-        "estilos-modal-pedido"
-      );
-
-    if (estilosModal) {
-      estilosModal.remove();
-    }
+    // Restaurar desplazamiento de la página
+    document.body.style.overflow = "";
 
   }
-
 
   document
     .getElementById("pedido-cerrar")
@@ -301,14 +282,12 @@ function crearModalPedido() {
       cerrarModal
     );
 
-
   document
     .getElementById("pedido-cancelar")
     .addEventListener(
       "click",
       cerrarModal
     );
-
 
   // Cerrar haciendo clic fuera del cuadro
 
@@ -322,7 +301,6 @@ function crearModalPedido() {
 
     }
   );
-
 
   // ==========================================
   // CONFIRMAR PEDIDO
@@ -350,7 +328,6 @@ function crearModalPedido() {
           10
         );
 
-
       // ========================================
       // VALIDACIONES
       // ========================================
@@ -366,7 +343,6 @@ function crearModalPedido() {
         return;
       }
 
-
       if (!whatsapp) {
 
         alert(
@@ -377,7 +353,6 @@ function crearModalPedido() {
 
         return;
       }
-
 
       if (!sector) {
 
@@ -390,7 +365,6 @@ function crearModalPedido() {
         return;
       }
 
-
       if (
         isNaN(cantidad) ||
         cantidad < 1
@@ -402,14 +376,12 @@ function crearModalPedido() {
 
       }
 
-
       // ========================================
       // SUBTOTAL
       // ========================================
 
       const subtotal =
         precioActual * cantidad;
-
 
       // ========================================
       // OBJETO DEL PEDIDO
@@ -457,7 +429,6 @@ function crearModalPedido() {
 
       };
 
-
       // ========================================
       // DESACTIVAR BOTÓN
       // ========================================
@@ -468,7 +439,6 @@ function crearModalPedido() {
         <i class="fa-solid fa-spinner fa-spin"></i>
         Enviando...
       `;
-
 
       // ========================================
       // GUARDAR EN FIRESTORE
@@ -481,7 +451,6 @@ function crearModalPedido() {
           pedido
         );
 
-
         // ======================================
         // PEDIDO GUARDADO
         // ======================================
@@ -491,9 +460,7 @@ function crearModalPedido() {
           "Tu pedido quedó registrado como Pendiente."
         );
 
-
         cerrarModal();
-
 
       } catch (error) {
 
@@ -502,12 +469,10 @@ function crearModalPedido() {
           error
         );
 
-
         alert(
           "No se pudo enviar el pedido.\n\n" +
           "Por favor, intentá nuevamente."
         );
-
 
         botonConfirmar.disabled = false;
 
@@ -522,7 +487,6 @@ function crearModalPedido() {
   );
 
 }
-
 
 // ============================================
 // FORMATEAR PRECIO
@@ -541,7 +505,6 @@ function formatearPrecio(valor) {
 
 }
 
-
 // ============================================
 // OBTENER PRECIO DESDE TEXTO
 // ============================================
@@ -552,8 +515,7 @@ function obtenerPrecio(texto) {
     return 0;
   }
 
-
-  // Ejemplo:
+  // Ejemplos:
   // "$2.500"
   // "$5.000"
   // "$16.000"
@@ -565,17 +527,14 @@ function obtenerPrecio(texto) {
     .replace(/[^\d.]/g, "")
     .trim();
 
-
   const precio =
     parseFloat(numero);
-
 
   return isNaN(precio)
     ? 0
     : precio;
 
 }
-
 
 // ============================================
 // ABRIR PEDIDO
@@ -590,11 +549,8 @@ function abrirPedido(
 
   precioActual = precio;
 
-
   // Crear el modal
-
   crearModalPedido();
-
 
   // Obtener elementos
 
@@ -603,48 +559,40 @@ function abrirPedido(
       "modal-pedido"
     );
 
-
   const nombreProducto =
     document.getElementById(
       "pedido-producto-nombre"
     );
-
 
   const precioProducto =
     document.getElementById(
       "pedido-producto-precio"
     );
 
-
   const inputCantidad =
     document.getElementById(
       "pedido-cantidad"
     );
-
 
   const inputNombre =
     document.getElementById(
       "pedido-nombre"
     );
 
-
   const inputWhatsapp =
     document.getElementById(
       "pedido-whatsapp"
     );
-
 
   const selectSector =
     document.getElementById(
       "pedido-sector"
     );
 
-
   const inputObservaciones =
     document.getElementById(
       "pedido-observaciones"
     );
-
 
   // ==========================================
   // COMPROBACIÓN DE SEGURIDAD
@@ -669,7 +617,6 @@ function abrirPedido(
 
   }
 
-
   // ==========================================
   // CARGAR DATOS
   // ==========================================
@@ -677,10 +624,8 @@ function abrirPedido(
   nombreProducto.textContent =
     nombre;
 
-
   precioProducto.textContent =
     formatearPrecio(precio);
-
 
   inputCantidad.value = 1;
 
@@ -692,7 +637,6 @@ function abrirPedido(
 
   inputObservaciones.value = "";
 
-
   // ==========================================
   // ACTUALIZAR TOTAL
   // ==========================================
@@ -702,10 +646,8 @@ function abrirPedido(
       "pedido-total"
     );
 
-
   totalElemento.textContent =
     formatearPrecio(precio);
-
 
   // ==========================================
   // MOSTRAR
@@ -713,41 +655,8 @@ function abrirPedido(
 
   modal.style.display = "flex";
 
-
   // Evitar desplazamiento de la página
-
-  document.body.style.overflow =
-    "hidden";
-
-
-  // Devolver scroll al cerrar
-
-  const observer =
-    new MutationObserver(
-      function () {
-
-        if (
-          !document.body.contains(modal)
-        ) {
-
-          document.body.style.overflow =
-            "";
-
-          observer.disconnect();
-
-        }
-
-      }
-    );
-
-
-  observer.observe(
-    document.body,
-    {
-      childList: true
-    }
-  );
-
+  document.body.style.overflow = "hidden";
 
   // ==========================================
   // ENFOCAR NOMBRE
@@ -764,7 +673,6 @@ function abrirPedido(
 
 }
 
-
 // ============================================
 // ACTIVAR BOTONES DE PRODUCTOS
 // ============================================
@@ -775,7 +683,6 @@ function activarBotonesPedido() {
     document.querySelectorAll(
       ".menu-item"
     );
-
 
   productos.forEach(
     function (producto) {
@@ -792,18 +699,15 @@ function activarBotonesPedido() {
 
       }
 
-
       const elementoNombre =
         producto.querySelector(
           ".item-info h4"
         );
 
-
       const elementoPrecio =
         producto.querySelector(
           ".item-price"
         );
-
 
       if (
         !elementoNombre ||
@@ -814,36 +718,29 @@ function activarBotonesPedido() {
 
       }
 
-
       const nombre =
         elementoNombre.textContent.trim();
-
 
       const precio =
         obtenerPrecio(
           elementoPrecio.textContent
         );
 
-
       // Crear botón
 
       const boton =
         document.createElement("button");
 
-
       boton.type =
         "button";
 
-
       boton.className =
         "boton-hacer-pedido";
-
 
       boton.innerHTML = `
         <i class="fa-solid fa-cart-shopping"></i>
         Hacer pedido
       `;
-
 
       boton.addEventListener(
         "click",
@@ -857,7 +754,6 @@ function activarBotonesPedido() {
         }
       );
 
-
       producto.appendChild(
         boton
       );
@@ -866,7 +762,6 @@ function activarBotonesPedido() {
   );
 
 }
-
 
 // ============================================
 // ACTIVAR BOTONES DE PROMOCIONES / COMBOS
@@ -879,7 +774,6 @@ function activarBotonesPromociones() {
       ".promo-card"
     );
 
-
   promociones.forEach(
     function (promocion) {
 
@@ -890,7 +784,6 @@ function activarBotonesPromociones() {
           ".promo-title"
         );
 
-
       // Buscar precio
 
       const elementoPrecio =
@@ -898,14 +791,12 @@ function activarBotonesPromociones() {
           ".promo-price"
         );
 
-
       // Buscar botón existente
 
       const boton =
         promocion.querySelector(
           ".btn"
         );
-
 
       if (
         !elementoNombre ||
@@ -917,16 +808,13 @@ function activarBotonesPromociones() {
 
       }
 
-
       const nombre =
         elementoNombre.textContent.trim();
-
 
       const precio =
         obtenerPrecio(
           elementoPrecio.textContent
         );
-
 
       // El botón originalmente puede tener:
       // href="#contacto"
@@ -935,25 +823,21 @@ function activarBotonesPromociones() {
         "href"
       );
 
-
       boton.setAttribute(
         "type",
         "button"
       );
-
 
       boton.innerHTML = `
         <i class="fa-solid fa-cart-shopping"></i>
         Hacer pedido
       `;
 
-
       boton.addEventListener(
         "click",
         function (event) {
 
           event.preventDefault();
-
 
           abrirPedido(
             nombre,
@@ -967,7 +851,6 @@ function activarBotonesPromociones() {
   );
 
 }
-
 
 // ============================================
 // INICIALIZAR
