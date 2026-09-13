@@ -340,21 +340,6 @@ overlay.innerHTML = `
 
     <div class="pedido-campo">
 
-      <label for="pedido-nombre">
-        Nombre
-      </label>
-
-      <input
-        type="text"
-        id="pedido-nombre"
-        placeholder="Tu nombre"
-        autocomplete="name"
-      >
-
-    </div>
-
-    <div class="pedido-campo">
-
       <label for="pedido-whatsapp">
         WhatsApp / teléfono
       </label>
@@ -480,9 +465,6 @@ const totalValor =
 const inputNombre =
   document.getElementById("pedido-nombre");
 
-const inputWhatsapp =
-  document.getElementById("pedido-whatsapp");
-
 const selectSector =
   document.getElementById("pedido-sector");
 
@@ -553,7 +535,6 @@ function abrirPedido(nombre, precio) {
     cantidad;
 
   inputNombre.value = "";
-  inputWhatsapp.value = "";
   selectSector.value = "";
   inputObservaciones.value = "";
 
@@ -651,9 +632,6 @@ botonConfirmar.addEventListener("click", async () => {
   const nombre =
     inputNombre.value.trim();
 
-  const whatsapp =
-    inputWhatsapp.value.trim();
-
   const sector =
     selectSector.value;
 
@@ -671,19 +649,6 @@ botonConfirmar.addEventListener("click", async () => {
     );
 
     inputNombre.focus();
-
-    return;
-  }
-
-
-  if (!whatsapp) {
-
-    mostrarMensaje(
-      "Por favor, ingresá tu WhatsApp o teléfono.",
-      "error"
-    );
-
-    inputWhatsapp.focus();
 
     return;
   }
@@ -731,8 +696,6 @@ botonConfirmar.addEventListener("click", async () => {
     const pedido = {
 
       nombre: nombre,
-
-      whatsapp: whatsapp,
 
       sector: sector,
 
