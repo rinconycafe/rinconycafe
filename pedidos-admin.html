@@ -33,7 +33,40 @@
       background: var(--crema);
       color: var(--texto);
     }
+.barra-pedidos-derecha {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
 
+.btn-cerrar-sesion {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 14px;
+  background: var(--marron-oscuro);
+  color: white;
+  font-family: inherit;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.btn-cerrar-sesion:hover {
+  background: var(--terracota);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 550px) {
+  .barra-pedidos-derecha {
+    width: 100%;
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .btn-cerrar-sesion {
+    width: 100%;
+  }
+}
     /* =========================
        ENCABEZADO
     ========================= */
@@ -728,20 +761,32 @@
 
     <!-- BARRA -->
 
-    <section class="barra-pedidos">
+<section class="barra-pedidos">
 
-      <h2>
-        Pedidos recibidos
-      </h2>
+  <h2>
+    Pedidos recibidos
+  </h2>
 
-      <span
-        id="estado-conexion"
-        class="estado-conexion"
-      >
-        ● Conectado en tiempo real
-      </span>
+  <div class="barra-pedidos-derecha">
 
-    </section>
+    <span
+      id="estado-conexion"
+      class="estado-conexion"
+    >
+      ● Conectado en tiempo real
+    </span>
+
+    <button
+      id="btn-cerrar-sesion"
+      type="button"
+      class="btn-cerrar-sesion"
+    >
+      Cerrar sesión
+    </button>
+
+  </div>
+
+</section>
 
 
     <!-- LISTA -->
