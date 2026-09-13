@@ -126,7 +126,73 @@
     .oculto {
       display: none !important;
     }
+/* =========================
+   LOGIN
+========================= */
 
+#bloque-sin-acceso {
+  max-width: 500px;
+}
+
+#formulario-login {
+  margin-top: 25px;
+  text-align: left;
+}
+
+.campo-login {
+  margin-bottom: 18px;
+}
+
+.campo-login label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--marron-oscuro);
+  font-weight: bold;
+}
+
+.campo-login input {
+  width: 100%;
+  padding: 13px 14px;
+  border: 1px solid #c8b39e;
+  border-radius: 9px;
+  background: white;
+  color: var(--texto);
+  font-size: 1rem;
+  font-family: inherit;
+  outline: none;
+}
+
+.campo-login input:focus {
+  border-color: var(--terracota);
+  box-shadow: 0 0 0 3px rgba(200, 109, 81, 0.15);
+}
+
+.btn-login {
+  width: 100%;
+  border: none;
+  border-radius: 9px;
+  padding: 13px 16px;
+  background: var(--terracota);
+  color: white;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.btn-login:hover {
+  background: #b85d43;
+  transform: translateY(-1px);
+}
+
+.mensaje-login {
+  min-height: 20px;
+  margin: 12px 0 0;
+  text-align: center;
+  color: var(--rojo);
+  font-weight: bold;
+}
     /* =========================
        RESUMEN
     ========================= */
@@ -580,21 +646,48 @@
        SIN ACCESO
   ========================================== -->
 
-  <section
-    id="bloque-sin-acceso"
-    class="oculto"
-  >
-    <h2>🔒 Acceso restringido</h2>
+<section
+  id="bloque-sin-acceso"
+  class="oculto"
+>
+  <h2>🔐 Acceso al panel</h2>
 
-    <p>
-      No tenés permiso para acceder al
-      panel de administración de pedidos.
-    </p>
+  <p>
+    Ingresá la contraseña para acceder
+    al panel de administración.
+  </p>
 
-    <p>
-      Iniciá sesión con la cuenta de administrador.
-    </p>
-  </section>
+  <form id="formulario-login">
+
+    <div class="campo-login">
+      <label for="login-password">
+        🔑 Contraseña
+      </label>
+
+      <input
+        type="password"
+        id="login-password"
+        placeholder="Ingresá la contraseña"
+        required
+        autocomplete="current-password"
+      >
+    </div>
+
+    <button
+      type="submit"
+      class="btn-login"
+    >
+      Iniciar sesión
+    </button>
+
+    <p
+      id="mensaje-login"
+      class="mensaje-login"
+    ></p>
+
+  </form>
+
+</section>
 
 
   <!-- =========================================
