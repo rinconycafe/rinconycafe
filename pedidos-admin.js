@@ -523,44 +523,37 @@ function crearTarjetaPedido(pedido) {
 
       </div>
 
-      <div class="pedido-acciones">
+<div class="pedido-acciones">
 
-        <button
-          class="btn-estado btn-pendiente"
-          onclick="cambiarEstadoPedido('${pedido.id}', 'Pendiente')"
-        >
-          Pendiente
-        </button>
+  <button
+    class="btn-estado btn-preparando"
+    onclick="cambiarEstadoPedido('${pedido.id}', 'Preparando')"
+  >
+    Preparando
+  </button>
 
-        <button
-          class="btn-estado btn-preparando"
-          onclick="cambiarEstadoPedido('${pedido.id}', 'Preparando')"
-        >
-          Preparando
-        </button>
+  <button
+    class="btn-estado btn-listo"
+    onclick="cambiarEstadoPedido('${pedido.id}', 'Listo')"
+  >
+    Listo
+  </button>
 
-        <button
-          class="btn-estado btn-listo"
-          onclick="cambiarEstadoPedido('${pedido.id}', 'Listo')"
-        >
-          Listo
-        </button>
+  <button
+    class="btn-estado btn-entregado"
+    onclick="finalizarPedido('${pedido.id}', 'Entregado')"
+  >
+    Entregado
+  </button>
 
-        <button
-          class="btn-estado btn-entregado"
-          onclick="cambiarEstadoPedido('${pedido.id}', 'Entregado')"
-        >
-          Entregado
-        </button>
+  <button
+    class="btn-estado btn-cancelado"
+    onclick="finalizarPedido('${pedido.id}', 'Cancelado')"
+  >
+    Cancelado
+  </button>
 
-        <button
-          class="btn-eliminar"
-          onclick="eliminarPedido('${pedido.id}')"
-        >
-          🗑️ Eliminar
-        </button>
-
-      </div>
+</div>
 
     </article>
   `;
