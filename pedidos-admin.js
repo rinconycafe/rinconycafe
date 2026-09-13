@@ -14,228 +14,451 @@ import {
   doc
 } from "./firebase-init.js";
 
-
-// ============================================
-// VARIABLES
-// ============================================
-
-let pedidos = [];
-
-
 // ============================================
 // ELEMENTOS DEL HTML
 // ============================================
 
-const bloqueSinAcceso =
-  document.getElementById("bloque-sin-acceso");
+const bloqueSinAcceso = document.getElementById("bloque-sin-acceso");
+const bloqueAdmin = document.getElementById("bloque-admin");
 
-const bloqueAdmin =
-  document.getElementById("bloque-admin");
+const resumenTotal = document.getElementById("resumen-total");
+const resumenPendientes = document.getElementById("resumen-pendientes");
+const resumenPreparando = document.getElementById("resumen-preparando");
+const resumenListos = document.getElementById("resumen-listos");
 
-const listaPedidos =
-  document.getElementById("lista-pedidos");
-
-const resumenTotal =
-  document.getElementById("resumen-total");
-
-const resumenPendientes =
-  document.getElementById("resumen-pendientes");
-
-const resumenPreparando =
-  document.getElementById("resumen-preparando");
-
-const resumenListos =
-  document.getElementById("resumen-listos");
-
+const listaPedidos = document.getElementById("lista-pedidos");
+const estadoConexion = document.getElementById("estado-conexion");
 
 // ============================================
-// CONTROL DE ACCESO
+// PEDIDOS CARGADOS
 // ============================================
 
-onAuthStateChanged(
-  auth,
-  function (user) {
+let pedidos = [];
 
-    // ----------------------------------------
-    // NO HAY USUARIO INICIADO
-    // ----------------------------------------
+// ============================================
+// COMPROBAR SESIÓN
+// ============================================
 
-    if (!user) {
+onAuthStateChanged(auth, (usuario) => {
 
-      bloqueSinAcceso.classList.remove(
-        "oculto"
-      );
+  if (!usuario) {
 
-      bloqueAdmin.classList.add(
-        "oculto"
-      );
+    bloqueSinAcceso.classList.remove("oculto");
+    bloqueAdmin.classList.add("oculto");
 
-      return;
-    }
-
-
-    // ----------------------------------------
-    // USUARIO AUTENTICADO
-    // ----------------------------------------
-
-    bloqueSinAcceso.classList.add(
-      "oculto"
-    );
-
-    bloqueAdmin.classList.remove(
-      "oculto"
-    );
-
-
-    // Empezar a escuchar pedidos
-    escucharPedidos();
+    return;
   }
-);
 
+  // Usuario autenticado
+  bloqueSinAcceso.classList.add("oculto");
+  bloqueAdmin.classList.remove("oculto");
+
+  escucharPedidos();
+});
 
 // ============================================
-// ESCUCHAR PEDIDOS EN TIEMPO REAL
+// ESCUCHAR PEDIDOS DE FIRESTORE
 // ============================================
 
 function escucharPedidos() {
 
-  const referenciaPedidos =
-    collection(
-      db,
-      "pedidos"
-    );
+  try {
 
+    const referenciaPedidos = collection(db, "pedidos");
 
-  onSnapshot(
-    referenciaPedidos,
+    onSnapshot(
+      referenciaPedidos,
 
-    function (snapshot) {
+      (snapshot) => {
 
-      pedidos = [];
+        pedidos = [];
 
-
-      snapshot.forEach(
-        function (documento) {
+        snapshot.forEach((documento) => {
 
           pedidos.push({
             id: documento.id,
             ...documento.data()
           });
 
-        }
-      );
+        });
 
+        // Ordenar del más nuevo al más antiguo
+        pedidos.sort((a, b) => {
 
-      // --------------------------------------
-      // ORDENAR DEL MÁS NUEVO AL MÁS VIEJO
-      // --------------------------------------
+          const fechaA = a.fecha
+            ? new Date(a.fecha).getTime()
+            : 0;
 
-      pedidos.sort(
-        function (a, b) {
-
-          const fechaA =
-            obtenerFecha(a.fecha);
-
-          const fechaB =
-            obtenerFecha(b.fecha);
+          const fechaB = b.fecha
+            ? new Date(b.fecha).getTime()
+            : 0;
 
           return fechaB - fechaA;
-        }
-      );
 
+        });
 
-      // --------------------------------------
-      // ACTUALIZAR PANTALLA
-      // --------------------------------------
+        estadoConexion.textContent = "● Conectado en tiempo real";
 
-      mostrarPedidos();
+        renderizarResumen();
+        renderizarPedidos();
 
-      actualizarResumen();
-    },
+      },
 
+      (error) => {
 
-    function (error) {
+        console.error("Error al escuchar pedidos:", error);
 
-      console.error(
-        "Error al escuchar pedidos:",
-        error
-      );
+        estadoConexion.textContent =
+          "● Error de conexión";
 
+        listaPedidos.innerHTML = `
+          <div class="sin-pedidos">
+            <h3>⚠️ No se pudieron cargar los pedidos</h3>
+            <p>
+              Revisá la consola del navegador para ver el error.
+            </p>
+          </div>
+        `;
 
-      listaPedidos.innerHTML = `
-        <div class="sin-pedidos">
+      }
+    );
 
-          <h3>
-            ⚠️ No se pudieron cargar los pedidos
-          </h3>
+  } catch (error) {
 
-          <p>
-            Ocurrió un error al conectar con
-            la colección "pedidos" de Firebase.
-          </p>
+    console.error("Error iniciando pedidos:", error);
 
-          <p>
-            Revisá la consola del navegador
-            para ver más información.
-          </p>
+  }
+
+}
+
+// ============================================
+// RESUMEN
+// ============================================
+
+function renderizarResumen() {
+
+  const total = pedidos.length;
+
+  const pendientes = pedidos.filter(
+    (pedido) => pedido.estado === "Pendiente"
+  ).length;
+
+  const preparando = pedidos.filter(
+    (pedido) => pedido.estado === "Preparando"
+  ).length;
+
+  const listos = pedidos.filter(
+    (pedido) => pedido.estado === "Listo"
+  ).length;
+
+  resumenTotal.textContent = total;
+  resumenPendientes.textContent = pendientes;
+  resumenPreparando.textContent = preparando;
+  resumenListos.textContent = listos;
+}
+
+// ============================================
+// MOSTRAR PEDIDOS
+// ============================================
+
+function renderizarPedidos() {
+
+  if (pedidos.length === 0) {
+
+    listaPedidos.innerHTML = `
+      <div class="sin-pedidos">
+
+        <h3>☕ No hay pedidos todavía</h3>
+
+        <p>
+          Cuando un cliente realice un pedido,
+          aparecerá aquí automáticamente.
+        </p>
+
+      </div>
+    `;
+
+    return;
+  }
+
+  listaPedidos.innerHTML = pedidos
+    .map((pedido) => crearTarjetaPedido(pedido))
+    .join("");
+}
+
+// ============================================
+// CREAR TARJETA DE PEDIDO
+// ============================================
+
+function crearTarjetaPedido(pedido) {
+
+  const estado = pedido.estado || "Pendiente";
+
+  const claseEstado = obtenerClaseEstado(estado);
+
+  const fecha = pedido.fecha
+    ? formatearFecha(pedido.fecha)
+    : "Fecha no disponible";
+
+  const productos = Array.isArray(pedido.productos)
+    ? pedido.productos
+    : [];
+
+  const productosHTML = productos
+    .map((producto) => {
+
+      const nombre = producto.nombre || "Producto";
+
+      const cantidad = Number(producto.cantidad) || 0;
+
+      const precio = Number(producto.precio) || 0;
+
+      const subtotal =
+        Number(producto.subtotal) ||
+        cantidad * precio;
+
+      return `
+        <div class="producto-linea">
+
+          <div>
+            <div class="producto-nombre">
+              ${escaparHTML(nombre)}
+            </div>
+
+            <div class="producto-detalle">
+              ${cantidad} × ${formatearPrecio(precio)}
+            </div>
+          </div>
+
+          <div class="producto-subtotal">
+            ${formatearPrecio(subtotal)}
+          </div>
 
         </div>
       `;
-    }
+
+    })
+    .join("");
+
+  const observaciones = pedido.observaciones
+    ? `
+      <div class="pedido-observaciones">
+
+        <strong>📝 Observaciones</strong>
+
+        <p>
+          ${escaparHTML(pedido.observaciones)}
+        </p>
+
+      </div>
+    `
+    : "";
+
+  return `
+    <article class="pedido-card">
+
+      <div class="pedido-cabecera">
+
+        <div>
+
+          <h3 class="pedido-numero">
+            Pedido #${pedido.id.substring(0, 6)}
+          </h3>
+
+          <div class="pedido-fecha">
+            ${fecha}
+          </div>
+
+        </div>
+
+        <span class="estado-badge ${claseEstado}">
+          ${escaparHTML(estado)}
+        </span>
+
+      </div>
+
+
+      <div class="pedido-datos">
+
+        <div class="dato">
+
+          <span class="dato-label">
+            Cliente
+          </span>
+
+          <span class="dato-valor">
+            ${escaparHTML(pedido.nombre || "Sin nombre")}
+          </span>
+
+        </div>
+
+
+        <div class="dato">
+
+          <span class="dato-label">
+            WhatsApp
+          </span>
+
+          <span class="dato-valor">
+            ${escaparHTML(pedido.whatsapp || "No indicado")}
+          </span>
+
+        </div>
+
+
+        <div class="dato">
+
+          <span class="dato-label">
+            Sector
+          </span>
+
+          <span class="dato-valor">
+            ${escaparHTML(pedido.sector || "No indicado")}
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <div class="pedido-productos">
+
+        <h3>
+          🛒 Productos
+        </h3>
+
+        ${productosHTML}
+
+      </div>
+
+
+      ${observaciones}
+
+
+      <div class="pedido-total">
+
+        <span>
+          Total
+        </span>
+
+        <strong>
+          ${formatearPrecio(pedido.total)}
+        </strong>
+
+      </div>
+
+
+      <div class="pedido-acciones">
+
+        <button
+          class="btn-estado btn-pendiente"
+          onclick="cambiarEstadoPedido('${pedido.id}', 'Pendiente')"
+        >
+          Pendiente
+        </button>
+
+        <button
+          class="btn-estado btn-preparando"
+          onclick="cambiarEstadoPedido('${pedido.id}', 'Preparando')"
+        >
+          Preparando
+        </button>
+
+        <button
+          class="btn-estado btn-listo"
+          onclick="cambiarEstadoPedido('${pedido.id}', 'Listo')"
+        >
+          Listo
+        </button>
+
+        <button
+          class="btn-estado btn-entregado"
+          onclick="cambiarEstadoPedido('${pedido.id}', 'Entregado')"
+        >
+          Entregado
+        </button>
+
+        <button
+          class="btn-eliminar"
+          onclick="eliminarPedido('${pedido.id}')"
+        >
+          🗑️ Eliminar
+        </button>
+
+      </div>
+
+    </article>
+  `;
+}
+
+// ============================================
+// CAMBIAR ESTADO
+// ============================================
+
+window.cambiarEstadoPedido = async function (id, nuevoEstado) {
+
+  try {
+
+    await updateDoc(
+      doc(db, "pedidos", id),
+      {
+        estado: nuevoEstado
+      }
+    );
+
+    console.log(
+      `Pedido actualizado a: ${nuevoEstado}`
+    );
+
+  } catch (error) {
+
+    console.error(
+      "Error al cambiar estado:",
+      error
+    );
+
+    alert(
+      "No se pudo cambiar el estado del pedido."
+    );
+
+  }
+
+};
+
+// ============================================
+// ELIMINAR PEDIDO
+// ============================================
+
+window.eliminarPedido = async function (id) {
+
+  const confirmar = confirm(
+    "¿Seguro que querés eliminar este pedido?\n\nEsta acción no se puede deshacer."
   );
-}
 
-
-// ============================================
-// OBTENER FECHA
-// ============================================
-
-function obtenerFecha(fecha) {
-
-  if (!fecha) {
-    return 0;
+  if (!confirmar) {
+    return;
   }
 
+  try {
 
-  // Timestamp de Firebase
+    await deleteDoc(
+      doc(db, "pedidos", id)
+    );
 
-  if (
-    typeof fecha.toDate === "function"
-  ) {
+  } catch (error) {
 
-    return fecha.toDate().getTime();
+    console.error(
+      "Error al eliminar pedido:",
+      error
+    );
+
+    alert(
+      "No se pudo eliminar el pedido."
+    );
+
   }
 
-
-  // Date normal
-
-  if (
-    fecha instanceof Date
-  ) {
-
-    return fecha.getTime();
-  }
-
-
-  // Texto / ISO
-
-  const fechaConvertida =
-    new Date(fecha);
-
-
-  if (
-    isNaN(
-      fechaConvertida.getTime()
-    )
-  ) {
-
-    return 0;
-  }
-
-
-  return fechaConvertida.getTime();
-}
-
+};
 
 // ============================================
 // FORMATEAR FECHA
@@ -243,36 +466,27 @@ function obtenerFecha(fecha) {
 
 function formatearFecha(fecha) {
 
-  const numeroFecha =
-    obtenerFecha(fecha);
+  const fechaObjeto = new Date(fecha);
 
-
-  if (!numeroFecha) {
-    return "Fecha desconocida";
+  if (isNaN(fechaObjeto.getTime())) {
+    return "Fecha no válida";
   }
 
-
-  return new Intl.DateTimeFormat(
+  return fechaObjeto.toLocaleString(
     "es-AR",
     {
       dateStyle: "short",
       timeStyle: "short"
     }
-  ).format(
-    new Date(numeroFecha)
   );
-}
 
+}
 
 // ============================================
 // FORMATEAR PRECIO
 // ============================================
 
 function formatearPrecio(valor) {
-
-  const numero =
-    Number(valor) || 0;
-
 
   return new Intl.NumberFormat(
     "es-AR",
@@ -281,36 +495,12 @@ function formatearPrecio(valor) {
       currency: "ARS",
       maximumFractionDigits: 0
     }
-  ).format(numero);
+  ).format(Number(valor) || 0);
+
 }
 
-
 // ============================================
-// ESCAPAR HTML
-// ============================================
-
-function escaparHTML(texto) {
-
-  if (
-    texto === null ||
-    texto === undefined
-  ) {
-
-    return "";
-  }
-
-
-  return String(texto)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
-
-
-// ============================================
-// OBTENER CLASE DEL ESTADO
+// CLASE DEL ESTADO
 // ============================================
 
 function obtenerClaseEstado(estado) {
@@ -335,667 +525,20 @@ function obtenerClaseEstado(estado) {
     default:
       return "estado-pendiente";
   }
+
 }
 
-
 // ============================================
-// MOSTRAR PEDIDOS
-// ============================================
-
-function mostrarPedidos() {
-
-  // ----------------------------------------
-  // NO HAY PEDIDOS
-  // ----------------------------------------
-
-  if (
-    pedidos.length === 0
-  ) {
-
-    listaPedidos.innerHTML = `
-      <div class="sin-pedidos">
-
-        <h3>
-          📭 No hay pedidos todavía
-        </h3>
-
-        <p>
-          Cuando un cliente haga un pedido,
-          aparecerá automáticamente aquí.
-        </p>
-
-      </div>
-    `;
-
-    return;
-  }
-
-
-  // ----------------------------------------
-  // CREAR LAS TARJETAS
-  // ----------------------------------------
-
-  listaPedidos.innerHTML =
-    pedidos
-      .map(
-        function (pedido) {
-
-          return crearPedidoHTML(
-            pedido
-          );
-        }
-      )
-      .join("");
-
-
-  // Activar botones
-
-  agregarEventosPedidos();
-}
-
-
-// ============================================
-// CREAR HTML DE UN PEDIDO
+// EVITAR HTML INYECTADO
 // ============================================
 
-function crearPedidoHTML(pedido) {
+function escaparHTML(texto) {
+
+  return String(texto)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 
-  const estado =
-    pedido.estado || "Pendiente";
-
-
-  const claseEstado =
-    obtenerClaseEstado(estado);
-
-
-  const nombreCliente =
-    escaparHTML(
-      pedido.nombre ||
-      "Sin nombre"
-    );
-
-
-  const whatsapp =
-    escaparHTML(
-      pedido.whatsapp ||
-      "Sin teléfono"
-    );
-
-
-  const sector =
-    escaparHTML(
-      pedido.sector ||
-      "Sin sector"
-    );
-
-
-  const observaciones =
-    pedido.observaciones || "";
-
-
-  // ========================================
-  // PRODUCTOS
-  // ========================================
-
-  let productosHTML = "";
-
-
-  if (
-    Array.isArray(pedido.productos) &&
-    pedido.productos.length > 0
-  ) {
-
-    productosHTML =
-      pedido.productos
-        .map(
-          function (producto) {
-
-            const nombreProducto =
-              escaparHTML(
-                producto.nombre ||
-                "Producto"
-              );
-
-
-            const cantidad =
-              Number(
-                producto.cantidad
-              ) || 1;
-
-
-            const precio =
-              Number(
-                producto.precio
-              ) || 0;
-
-
-            const subtotal =
-              Number(
-                producto.subtotal
-              ) ||
-              precio * cantidad;
-
-
-            return `
-              <div class="producto-linea">
-
-                <div>
-
-                  <div class="producto-nombre">
-                    ${nombreProducto}
-                  </div>
-
-                  <div class="producto-detalle">
-                    ${cantidad} ×
-                    ${formatearPrecio(precio)}
-                  </div>
-
-                </div>
-
-                <div class="producto-subtotal">
-                  ${formatearPrecio(subtotal)}
-                </div>
-
-              </div>
-            `;
-          }
-        )
-        .join("");
-
-  } else {
-
-    productosHTML = `
-      <div class="producto-linea">
-
-        <div>
-          No se encontraron productos.
-        </div>
-
-      </div>
-    `;
-  }
-
-
-  // ========================================
-  // OBSERVACIONES
-  // ========================================
-
-  const observacionesHTML =
-    observaciones.trim()
-      ? `
-        <div class="pedido-observaciones">
-
-          <strong>
-            📝 Observaciones
-          </strong>
-
-          <p>
-            ${escaparHTML(observaciones)}
-          </p>
-
-        </div>
-      `
-      : "";
-
-
-  // ========================================
-  // ID CORTO DEL PEDIDO
-  // ========================================
-
-  const idCorto =
-    pedido.id
-      ? pedido.id.substring(0, 6)
-      : "------";
-
-
-  // ========================================
-  // HTML COMPLETO
-  // ========================================
-
-  return `
-    <article
-      class="pedido-card"
-      data-id="${escaparHTML(pedido.id)}"
-    >
-
-      <!-- CABECERA -->
-
-      <div class="pedido-cabecera">
-
-        <div>
-
-          <h3 class="pedido-numero">
-            Pedido #${escaparHTML(idCorto)}
-          </h3>
-
-          <div class="pedido-fecha">
-            ${formatearFecha(pedido.fecha)}
-          </div>
-
-        </div>
-
-
-        <span
-          class="estado-badge ${claseEstado}"
-        >
-          ${escaparHTML(estado)}
-        </span>
-
-      </div>
-
-
-      <!-- DATOS DEL CLIENTE -->
-
-      <div class="pedido-datos">
-
-        <div class="dato">
-
-          <span class="dato-label">
-            Cliente
-          </span>
-
-          <span class="dato-valor">
-            ${nombreCliente}
-          </span>
-
-        </div>
-
-
-        <div class="dato">
-
-          <span class="dato-label">
-            WhatsApp / Teléfono
-          </span>
-
-          <span class="dato-valor">
-            ${whatsapp}
-          </span>
-
-        </div>
-
-
-        <div class="dato">
-
-          <span class="dato-label">
-            Sector
-          </span>
-
-          <span class="dato-valor">
-            ${sector}
-          </span>
-
-        </div>
-
-      </div>
-
-
-      <!-- PRODUCTOS -->
-
-      <div class="pedido-productos">
-
-        <h3>
-          ☕ Productos
-        </h3>
-
-        ${productosHTML}
-
-      </div>
-
-
-      <!-- OBSERVACIONES -->
-
-      ${observacionesHTML}
-
-
-      <!-- TOTAL -->
-
-      <div class="pedido-total">
-
-        <span>
-          Total
-        </span>
-
-        <strong>
-          ${formatearPrecio(pedido.total)}
-        </strong>
-
-      </div>
-
-
-      <!-- ACCIONES -->
-
-      <div class="pedido-acciones">
-
-        <button
-          type="button"
-          class="btn-estado btn-pendiente"
-          data-accion="estado"
-          data-estado="Pendiente"
-          data-id="${escaparHTML(pedido.id)}"
-        >
-          🟡 Pendiente
-        </button>
-
-
-        <button
-          type="button"
-          class="btn-estado btn-preparando"
-          data-accion="estado"
-          data-estado="Preparando"
-          data-id="${escaparHTML(pedido.id)}"
-        >
-          🟠 Preparando
-        </button>
-
-
-        <button
-          type="button"
-          class="btn-estado btn-listo"
-          data-accion="estado"
-          data-estado="Listo"
-          data-id="${escaparHTML(pedido.id)}"
-        >
-          🟢 Listo
-        </button>
-
-
-        <button
-          type="button"
-          class="btn-estado btn-entregado"
-          data-accion="estado"
-          data-estado="Entregado"
-          data-id="${escaparHTML(pedido.id)}"
-        >
-          ✅ Entregado
-        </button>
-
-
-        <button
-          type="button"
-          class="btn-eliminar"
-          data-accion="eliminar"
-          data-id="${escaparHTML(pedido.id)}"
-        >
-          🗑️ Eliminar
-        </button>
-
-      </div>
-
-    </article>
-  `;
-}
-
-
-// ============================================
-// ACTIVAR BOTONES
-// ============================================
-
-function agregarEventosPedidos() {
-
-  // ----------------------------------------
-  // BOTONES DE ESTADO
-  // ----------------------------------------
-
-  const botonesEstado =
-    document.querySelectorAll(
-      '[data-accion="estado"]'
-    );
-
-
-  botonesEstado.forEach(
-    function (boton) {
-
-      boton.addEventListener(
-        "click",
-        function () {
-
-          const id =
-            boton.dataset.id;
-
-          const estado =
-            boton.dataset.estado;
-
-          cambiarEstado(
-            id,
-            estado
-          );
-        }
-      );
-    }
-  );
-
-
-  // ----------------------------------------
-  // BOTONES ELIMINAR
-  // ----------------------------------------
-
-  const botonesEliminar =
-    document.querySelectorAll(
-      '[data-accion="eliminar"]'
-    );
-
-
-  botonesEliminar.forEach(
-    function (boton) {
-
-      boton.addEventListener(
-        "click",
-        function () {
-
-          const id =
-            boton.dataset.id;
-
-          eliminarPedido(id);
-        }
-      );
-    }
-  );
-}
-
-
-// ============================================
-// CAMBIAR ESTADO
-// ============================================
-
-async function cambiarEstado(
-  id,
-  nuevoEstado
-) {
-
-  const pedido =
-    pedidos.find(
-      function (item) {
-
-        return item.id === id;
-
-      }
-    );
-
-
-  if (!pedido) {
-    return;
-  }
-
-
-  // Si ya tiene ese estado,
-  // no hacemos nada.
-
-  if (
-    pedido.estado === nuevoEstado
-  ) {
-
-    return;
-  }
-
-
-  try {
-
-    await updateDoc(
-      doc(
-        db,
-        "pedidos",
-        id
-      ),
-      {
-        estado: nuevoEstado
-      }
-    );
-
-
-    console.log(
-      "Pedido actualizado:",
-      id,
-      nuevoEstado
-    );
-
-  } catch (error) {
-
-    console.error(
-      "Error al cambiar el estado:",
-      error
-    );
-
-
-    alert(
-      "No se pudo cambiar el estado del pedido."
-    );
-  }
-}
-
-
-// ============================================
-// ELIMINAR PEDIDO
-// ============================================
-
-async function eliminarPedido(id) {
-
-  const pedido =
-    pedidos.find(
-      function (item) {
-
-        return item.id === id;
-
-      }
-    );
-
-
-  if (!pedido) {
-    return;
-  }
-
-
-  const nombre =
-    pedido.nombre ||
-    "este cliente";
-
-
-  const confirmar =
-    confirm(
-      "¿Seguro que querés eliminar este pedido?\n\n" +
-      "Cliente: " +
-      nombre +
-      "\n\n" +
-      "Esta acción no se puede deshacer."
-    );
-
-
-  if (!confirmar) {
-    return;
-  }
-
-
-  try {
-
-    await deleteDoc(
-      doc(
-        db,
-        "pedidos",
-        id
-      )
-    );
-
-
-    console.log(
-      "Pedido eliminado:",
-      id
-    );
-
-  } catch (error) {
-
-    console.error(
-      "Error al eliminar el pedido:",
-      error
-    );
-
-
-    alert(
-      "No se pudo eliminar el pedido."
-    );
-  }
-}
-
-
-// ============================================
-// ACTUALIZAR RESUMEN
-// ============================================
-
-function actualizarResumen() {
-
-  const total =
-    pedidos.length;
-
-
-  const pendientes =
-    pedidos.filter(
-      function (pedido) {
-
-        return (
-          (pedido.estado || "Pendiente") ===
-          "Pendiente"
-        );
-
-      }
-    ).length;
-
-
-  const preparando =
-    pedidos.filter(
-      function (pedido) {
-
-        return (
-          pedido.estado ===
-          "Preparando"
-        );
-
-      }
-    ).length;
-
-
-  const listos =
-    pedidos.filter(
-      function (pedido) {
-
-        return (
-          pedido.estado ===
-          "Listo"
-        );
-
-      }
-    ).length;
-
-
-  resumenTotal.textContent =
-    total;
-
-
-  resumenPendientes.textContent =
-    pendientes;
-
-
-  resumenPreparando.textContent =
-    preparando;
-
-
-  resumenListos.textContent =
-    listos;
 }
