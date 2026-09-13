@@ -41,22 +41,35 @@ const estadoConexion = document.getElementById("estado-conexion");
 
 let pedidos = [];
 
+// Esta variable permite detener el listener
+// cuando el administrador cierra sesión.
+let detenerEscuchaPedidos = null;
+
 // ============================================
 // COMPROBAR SESIÓN
 // ============================================
 
 onAuthStateChanged(auth, (usuario) => {
 
+  // ------------------------------------------
+  // NO HAY USUARIO
+  // ------------------------------------------
+
   if (!usuario) {
+
+    if (detenerEscuchaPedidos) {
+      detenerEscuchaPedidos();
+      detenerEscuchaPedidos = null;
+    }
 
     mostrarLogin();
 
     return;
   }
 
-  // ==========================================
+  // ------------------------------------------
   // COMPROBAR QUE SEA EL ADMINISTRADOR
-  // ==========================================
+  // ------------------------------------------
 
   if (usuario.email !== ADMIN_EMAIL) {
 
@@ -64,21 +77,30 @@ onAuthStateChanged(auth, (usuario) => {
 
     mostrarLogin();
 
-    mensajeLogin.textContent =
-      "Esta cuenta no tiene permiso para acceder al panel.";
+    if (mensajeLogin) {
+      mensajeLogin.textContent =
+        "Esta cuenta no tiene permiso para acceder al panel.";
 
-    mensajeLogin.style.color = "#b94a48";
+      mensajeLogin.style.color = "#b94a48";
+    }
 
     return;
   }
 
-  // ==========================================
+  // ------------------------------------------
   // ADMINISTRADOR CORRECTO
-  // ==========================================
+  // ------------------------------------------
 
   ocultarLogin();
 
   bloqueAdmin.classList.remove("oculto");
+
+  // Evita crear varios listeners
+  // si se inicia/cierra sesión varias veces.
+  if (detenerEscuchaPedidos) {
+    detenerEscuchaPedidos();
+    detenerEscuchaPedidos = null;
+  }
 
   escucharPedidos();
 });
@@ -95,7 +117,6 @@ function mostrarLogin() {
   if (formularioLogin) {
     formularioLogin.classList.remove("oculto");
   }
-
 }
 
 // ============================================
@@ -109,7 +130,6 @@ function ocultarLogin() {
   if (formularioLogin) {
     formularioLogin.classList.add("oculto");
   }
-
 }
 
 // ============================================
@@ -122,7 +142,7 @@ if (formularioLogin) {
 
     evento.preventDefault();
 
-    const password = inputPassword.value;
+    const password = inputPassword.value.trim();
 
     if (!password) {
 
@@ -161,12 +181,12 @@ if (formularioLogin) {
         "Contraseña incorrecta.";
 
       mensajeLogin.style.color = "#b94a48";
-
     }
 
   });
 
 }
+
 // ============================================
 // CERRAR SESIÓN
 // ============================================
@@ -204,7 +224,7 @@ function escucharPedidos() {
   const referenciaPedidos =
     collection(db, "pedidos");
 
-  onSnapshot(
+  detenerEscuchaPedidos = onSnapshot(
     referenciaPedidos,
 
     (snapshot) => {
@@ -220,6 +240,7 @@ function escucharPedidos() {
 
       });
 
+      // Ordenar del más nuevo al más viejo
       pedidos.sort((a, b) => {
 
         const fechaA = a.fecha
@@ -234,8 +255,10 @@ function escucharPedidos() {
 
       });
 
-      estadoConexion.textContent =
-        "● Conectado en tiempo real";
+      if (estadoConexion) {
+        estadoConexion.textContent =
+          "● Conectado en tiempo real";
+      }
 
       renderizarResumen();
       renderizarPedidos();
@@ -249,8 +272,10 @@ function escucharPedidos() {
         error
       );
 
-      estadoConexion.textContent =
-        "● Error de conexión";
+      if (estadoConexion) {
+        estadoConexion.textContent =
+          "● Error de conexión";
+      }
 
     }
   );
@@ -263,23 +288,31 @@ function escucharPedidos() {
 
 function renderizarResumen() {
 
-  resumenTotal.textContent =
-    pedidos.length;
+  if (resumenTotal) {
+    resumenTotal.textContent =
+      pedidos.length;
+  }
 
-  resumenPendientes.textContent =
-    pedidos.filter(
-      pedido => pedido.estado === "Pendiente"
-    ).length;
+  if (resumenPendientes) {
+    resumenPendientes.textContent =
+      pedidos.filter(
+        pedido => pedido.estado === "Pendiente"
+      ).length;
+  }
 
-  resumenPreparando.textContent =
-    pedidos.filter(
-      pedido => pedido.estado === "Preparando"
-    ).length;
+  if (resumenPreparando) {
+    resumenPreparando.textContent =
+      pedidos.filter(
+        pedido => pedido.estado === "Preparando"
+      ).length;
+  }
 
-  resumenListos.textContent =
-    pedidos.filter(
-      pedido => pedido.estado === "Listo"
-    ).length;
+  if (resumenListos) {
+    resumenListos.textContent =
+      pedidos.filter(
+        pedido => pedido.estado === "Listo"
+      ).length;
+  }
 
 }
 
@@ -288,6 +321,10 @@ function renderizarResumen() {
 // ============================================
 
 function renderizarPedidos() {
+
+  if (!listaPedidos) {
+    return;
+  }
 
   if (pedidos.length === 0) {
 
@@ -314,7 +351,7 @@ function renderizarPedidos() {
 }
 
 // ============================================
-// CREAR TARJETA
+// CREAR TARJETA DE PEDIDO
 // ============================================
 
 function crearTarjetaPedido(pedido) {
@@ -336,44 +373,46 @@ function crearTarjetaPedido(pedido) {
       : [];
 
   const productosHTML =
-    productos.map(producto => {
+    productos
+      .map(producto => {
 
-      const nombre =
-        producto.nombre || "Producto";
+        const nombre =
+          producto.nombre || "Producto";
 
-      const cantidad =
-        Number(producto.cantidad) || 0;
+        const cantidad =
+          Number(producto.cantidad) || 0;
 
-      const precio =
-        Number(producto.precio) || 0;
+        const precio =
+          Number(producto.precio) || 0;
 
-      const subtotal =
-        Number(producto.subtotal) ||
-        cantidad * precio;
+        const subtotal =
+          Number(producto.subtotal) ||
+          cantidad * precio;
 
-      return `
-        <div class="producto-linea">
+        return `
+          <div class="producto-linea">
 
-          <div>
+            <div>
 
-            <div class="producto-nombre">
-              ${escaparHTML(nombre)}
+              <div class="producto-nombre">
+                ${escaparHTML(nombre)}
+              </div>
+
+              <div class="producto-detalle">
+                ${cantidad} × ${formatearPrecio(precio)}
+              </div>
+
             </div>
 
-            <div class="producto-detalle">
-              ${cantidad} × ${formatearPrecio(precio)}
+            <div class="producto-subtotal">
+              ${formatearPrecio(subtotal)}
             </div>
 
           </div>
+        `;
 
-          <div class="producto-subtotal">
-            ${formatearPrecio(subtotal)}
-          </div>
-
-        </div>
-      `;
-
-    }).join("");
+      })
+      .join("");
 
   const observaciones =
     pedido.observaciones
@@ -398,11 +437,13 @@ function crearTarjetaPedido(pedido) {
         <div>
 
           <h3 class="pedido-numero">
-            Pedido #${pedido.id.substring(0, 6)}
+            Pedido #${escaparHTML(
+              String(pedido.id).substring(0, 6)
+            )}
           </h3>
 
           <div class="pedido-fecha">
-            ${fecha}
+            ${escaparHTML(fecha)}
           </div>
 
         </div>
@@ -463,7 +504,10 @@ function crearTarjetaPedido(pedido) {
 
         <h3>🛒 Productos</h3>
 
-        ${productosHTML}
+        ${
+          productosHTML ||
+          "<p>No se encontraron productos.</p>"
+        }
 
       </div>
 
@@ -591,7 +635,7 @@ window.eliminarPedido =
   };
 
 // ============================================
-// FECHA
+// FORMATEAR FECHA
 // ============================================
 
 function formatearFecha(fecha) {
@@ -620,7 +664,7 @@ function formatearFecha(fecha) {
 }
 
 // ============================================
-// PRECIO
+// FORMATEAR PRECIO
 // ============================================
 
 function formatearPrecio(valor) {
