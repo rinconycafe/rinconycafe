@@ -1,5 +1,6 @@
 // ============================================
-// SISTEMA DE PEDIDOS - RINCÓN & CAFÉ
+// SISTEMA DE PEDIDOS
+// RINCÓN & CAFÉ
 // ============================================
 
 import {
@@ -9,505 +10,960 @@ import {
 } from "./firebase-init.js";
 
 // ============================================
-// ESTILOS DEL SISTEMA DE PEDIDOS
+// VARIABLES
 // ============================================
 
-const estilos = document.createElement("style");
-
-estilos.textContent = `
-/* Fondo de la ventana */
-.pedido-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(60, 36, 21, 0.75);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  z-index: 9999;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.25s ease, visibility 0.25s ease;
-}
-
-/* Ventana visible */
-.pedido-overlay.activo {
-  opacity: 1;
-  visibility: visible;
-}
-
-/* Ventana del formulario */
-.pedido-modal {
-  width: 100%;
-  max-width: 520px;
-  max-height: 90vh;
-  overflow-y: auto;
-  background: #faf6f0;
-  border-radius: 18px;
-  padding: 28px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.30);
-  position: relative;
-  transform: translateY(20px);
-  transition: transform 0.25s ease;
-}
-
-.pedido-overlay.activo .pedido-modal {
-  transform: translateY(0);
-}
-
-/* Botón cerrar */
-.pedido-cerrar {
-  position: absolute;
-  top: 12px;
-  right: 15px;
-  width: 38px;
-  height: 38px;
-  border: none;
-  border-radius: 50%;
-  background: transparent;
-  color: #6f4e37;
-  font-size: 26px;
-  cursor: pointer;
-}
-
-.pedido-cerrar:hover {
-  background: #e8d0b5;
-}
-
-/* Título */
-.pedido-titulo {
-  margin: 0 40px 6px 0;
-  color: #3c2415;
-  font-size: 27px;
-  font-family: "Playfair Display", serif;
-}
-
-.pedido-subtitulo {
-  margin: 0 0 22px;
-  color: #6f4e37;
-  font-size: 14px;
-}
-
-/* Producto seleccionado */
-.pedido-producto {
-  background: #e8d0b5;
-  border-radius: 12px;
-  padding: 15px;
-  margin-bottom: 20px;
-}
-
-.pedido-producto-nombre {
-  font-weight: 700;
-  color: #3c2415;
-  margin-bottom: 5px;
-}
-
-.pedido-producto-precio {
-  color: #6f4e37;
-}
-
-/* Campos */
-.pedido-campo {
-  margin-bottom: 16px;
-}
-
-.pedido-campo label {
-  display: block;
-  margin-bottom: 7px;
-  color: #3c2415;
-  font-weight: 600;
-  font-size: 14px;
-}
-
-.pedido-campo input,
-.pedido-campo textarea,
-.pedido-campo select {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 12px 13px;
-  border: 1px solid #d8c2aa;
-  border-radius: 10px;
-  background: white;
-  color: #3c2415;
-  font-family: inherit;
-  font-size: 15px;
-  outline: none;
-}
-
-.pedido-campo input:focus,
-.pedido-campo textarea:focus,
-.pedido-campo select:focus {
-  border-color: #c86d51;
-  box-shadow: 0 0 0 3px rgba(200, 109, 81, 0.12);
-}
-
-.pedido-campo textarea {
-  min-height: 85px;
-  resize: vertical;
-}
-
-/* Cantidad */
-.pedido-cantidad {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.pedido-cantidad button {
-  width: 38px;
-  height: 38px;
-  border: none;
-  border-radius: 50%;
-  background: #c86d51;
-  color: white;
-  font-size: 22px;
-  cursor: pointer;
-}
-
-.pedido-cantidad button:hover {
-  opacity: 0.85;
-}
-
-#pedido-cantidad-valor {
-  min-width: 35px;
-  text-align: center;
-  font-size: 18px;
-  font-weight: 700;
-  color: #3c2415;
-}
-
-/* Total */
-.pedido-total {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 22px;
-  padding: 16px;
-  border-radius: 12px;
-  background: #3c2415;
-  color: white;
-  font-size: 18px;
-  font-weight: 700;
-}
-
-#pedido-total-valor {
-  color: #e8d0b5;
-}
-
-/* Botones */
-.pedido-acciones {
-  display: flex;
-  gap: 10px;
-  margin-top: 18px;
-}
-
-.pedido-btn {
-  flex: 1;
-  padding: 13px 16px;
-  border-radius: 10px;
-  border: none;
-  cursor: pointer;
-  font-weight: 700;
-  font-family: inherit;
-  font-size: 14px;
-}
-
-.pedido-btn-cancelar {
-  background: #e8d0b5;
-  color: #3c2415;
-}
-
-.pedido-btn-confirmar {
-  background: #c86d51;
-  color: white;
-}
-
-.pedido-btn-confirmar:hover {
-  opacity: 0.9;
-}
-
-.pedido-btn-confirmar:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-/* Mensajes */
-.pedido-mensaje {
-  margin-top: 15px;
-  padding: 12px;
-  border-radius: 10px;
-  display: none;
-  font-size: 14px;
-}
-
-.pedido-mensaje.visible {
-  display: block;
-}
-
-.pedido-mensaje.exito {
-  background: #dce8d8;
-  color: #31552c;
-}
-
-.pedido-mensaje.error {
-  background: #f3d6d0;
-  color: #7a2f21;
-}
-
-/* Móvil */
-@media (max-width: 600px) {
-  .pedido-modal {
-    padding: 22px;
-    border-radius: 14px;
-  }
-
-  .pedido-titulo {
-    font-size: 23px;
-  }
-
-  .pedido-acciones {
-    flex-direction: column;
-  }
-}
-`;
-
-document.head.appendChild(estilos);
-
+let productoActual = null;
+let precioActual = 0;
 
 // ============================================
-// CREAR LA VENTANA DEL PEDIDO
+// CREAR MODAL
 // ============================================
 
-const overlay = document.createElement("div");
+function crearModalPedido() {
 
-overlay.className = "pedido-overlay";
+  // Si ya existe, no lo volvemos a crear
+  if (document.getElementById("modal-pedido")) {
+    return;
+  }
 
-overlay.innerHTML = `
-  <div class="pedido-modal">
+  const overlay = document.createElement("div");
 
-    <button
-      type="button"
-      class="pedido-cerrar"
-      id="pedido-cerrar"
-      aria-label="Cerrar"
-    >
-      ×
-    </button>
+  overlay.id = "modal-pedido";
 
-    <h2 class="pedido-titulo">Hacer pedido</h2>
+  overlay.innerHTML = `
+    <div class="pedido-modal">
 
-    <p class="pedido-subtitulo">
-      Completá tus datos para confirmar el pedido.
-    </p>
+      <div class="pedido-modal-header">
 
-    <div class="pedido-producto">
-      <div
-        class="pedido-producto-nombre"
-        id="pedido-producto-nombre"
-      ></div>
-
-      <div
-        class="pedido-producto-precio"
-        id="pedido-producto-precio"
-      ></div>
-    </div>
-
-    <div class="pedido-campo">
-
-      <label>Cantidad</label>
-
-      <div class="pedido-cantidad">
+        <h3>
+          <i class="fa-solid fa-cart-shopping"></i>
+          Hacer pedido
+        </h3>
 
         <button
           type="button"
-          id="pedido-cantidad-menos"
+          id="pedido-cerrar"
+          class="pedido-cerrar"
+          aria-label="Cerrar"
         >
-          −
-        </button>
-
-        <span id="pedido-cantidad-valor">1</span>
-
-        <button
-          type="button"
-          id="pedido-cantidad-mas"
-        >
-          +
+          ×
         </button>
 
       </div>
 
+
+      <div class="pedido-contenido">
+
+        <!-- PRODUCTO -->
+
+        <div class="pedido-producto">
+
+          <h4 id="pedido-producto-nombre">
+            Producto
+          </h4>
+
+          <p id="pedido-producto-precio">
+            $0
+          </p>
+
+        </div>
+
+
+        <!-- CANTIDAD -->
+
+        <div class="pedido-campo">
+
+          <label for="pedido-cantidad">
+            Cantidad
+          </label>
+
+          <input
+            type="number"
+            id="pedido-cantidad"
+            min="1"
+            value="1"
+          >
+
+        </div>
+
+
+        <!-- NOMBRE -->
+
+        <div class="pedido-campo">
+
+          <label for="pedido-nombre">
+            Nombre
+          </label>
+
+          <input
+            type="text"
+            id="pedido-nombre"
+            placeholder="Tu nombre"
+            autocomplete="name"
+          >
+
+        </div>
+
+
+        <!-- WHATSAPP -->
+
+        <div class="pedido-campo">
+
+          <label for="pedido-whatsapp">
+            WhatsApp / Teléfono
+          </label>
+
+          <input
+            type="tel"
+            id="pedido-whatsapp"
+            placeholder="Ej: 11 1234-5678"
+            autocomplete="tel"
+          >
+
+        </div>
+
+
+        <!-- SECTOR -->
+
+        <div class="pedido-campo">
+
+          <label for="pedido-sector">
+            ¿Dónde vas a estar?
+          </label>
+
+          <select id="pedido-sector">
+
+            <option value="">
+              Seleccioná un sector
+            </option>
+
+            <option value="Familia">
+              Familia
+            </option>
+
+            <option value="Estudio / Trabajo — Mesa de 1 a 2">
+              Estudio / Trabajo — Mesa de 1 a 2
+            </option>
+
+            <option value="Biblioteca / Lectura">
+              Biblioteca / Lectura
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <!-- OBSERVACIONES -->
+
+        <div class="pedido-campo">
+
+          <label for="pedido-observaciones">
+            Observaciones
+            <span>(opcional)</span>
+          </label>
+
+          <textarea
+            id="pedido-observaciones"
+            rows="3"
+            placeholder="¿Querés agregar alguna indicación?"
+          ></textarea>
+
+        </div>
+
+
+        <!-- TOTAL -->
+
+        <div class="pedido-total">
+
+          <span>
+            Total
+          </span>
+
+          <strong id="pedido-total">
+            $0
+          </strong>
+
+        </div>
+
+
+        <!-- BOTONES -->
+
+        <div class="pedido-botones">
+
+          <button
+            type="button"
+            id="pedido-cancelar"
+            class="pedido-btn pedido-btn-cancelar"
+          >
+            Cancelar
+          </button>
+
+          <button
+            type="button"
+            id="pedido-confirmar"
+            class="pedido-btn pedido-btn-confirmar"
+          >
+            <i class="fa-solid fa-check"></i>
+            Confirmar pedido
+          </button>
+
+        </div>
+
+      </div>
+
     </div>
+  `;
 
-    <div class="pedido-campo">
-
-      <label for="pedido-whatsapp">
-        WhatsApp / teléfono
-      </label>
-
-      <input
-        type="tel"
-        id="pedido-whatsapp"
-        placeholder="Ej.: 11 1234-5678"
-        autocomplete="tel"
-      >
-
-    </div>
-
-    <div class="pedido-campo">
-
-      <label for="pedido-sector">
-        Sector
-      </label>
-
-      <select id="pedido-sector">
-
-        <option value="">
-          Seleccioná un sector
-        </option>
-
-        <option value="Familia">
-          Familia
-        </option>
-
-        <option value="Estudio / Trabajo — Mesa de 1 a 2">
-          Estudio / Trabajo — Mesa de 1 a 2
-        </option>
-
-        <option value="Biblioteca / Lectura">
-          Biblioteca / Lectura
-        </option>
-
-      </select>
-
-    </div>
-
-    <div class="pedido-campo">
-
-      <label for="pedido-observaciones">
-        Observaciones
-        <span style="font-weight:400;">
-          (opcional)
-        </span>
-      </label>
-
-      <textarea
-        id="pedido-observaciones"
-        placeholder="Ej.: sin azúcar, poca espuma, etc."
-      ></textarea>
-
-    </div>
-
-    <div class="pedido-total">
-
-      <span>Total</span>
-
-      <span id="pedido-total-valor">
-        $0
-      </span>
-
-    </div>
-
-    <div class="pedido-acciones">
-
-      <button
-        type="button"
-        class="pedido-btn pedido-btn-cancelar"
-        id="pedido-cancelar"
-      >
-        Cancelar
-      </button>
-
-      <button
-        type="button"
-        class="pedido-btn pedido-btn-confirmar"
-        id="pedido-confirmar"
-      >
-        Confirmar pedido
-      </button>
-
-    </div>
-
-    <div
-      class="pedido-mensaje"
-      id="pedido-mensaje"
-    ></div>
-
-  </div>
-`;
-
-document.body.appendChild(overlay);
+  document.body.appendChild(overlay);
 
 
-// ============================================
-// VARIABLES
-// ============================================
+  // ==========================================
+  // ESTILOS DEL MODAL
+  // ==========================================
 
-let productoSeleccionado = null;
-let cantidad = 1;
+  const estilos = document.createElement("style");
 
+  estilos.id = "estilos-modal-pedido";
 
-// ============================================
-// ELEMENTOS
-// ============================================
+  estilos.textContent = `
 
-const productoNombre =
-  document.getElementById("pedido-producto-nombre");
+    #modal-pedido {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
 
-const productoPrecio =
-  document.getElementById("pedido-producto-precio");
+      display: flex;
+      align-items: center;
+      justify-content: center;
 
-const cantidadValor =
-  document.getElementById("pedido-cantidad-valor");
+      padding: 20px;
 
-const totalValor =
-  document.getElementById("pedido-total-valor");
+      background: rgba(0, 0, 0, 0.65);
 
-const inputNombre =
-  document.getElementById("pedido-nombre");
-
-const selectSector =
-  document.getElementById("pedido-sector");
-
-const inputObservaciones =
-  document.getElementById("pedido-observaciones");
-
-const mensaje =
-  document.getElementById("pedido-mensaje");
-
-const botonConfirmar =
-  document.getElementById("pedido-confirmar");
+      overflow-y: auto;
+    }
 
 
-// ============================================
-// FORMATO DE PRECIO
-// ============================================
+    .pedido-modal {
+      width: 100%;
+      max-width: 500px;
 
-function formatearPrecio(numero) {
+      background: #faf6f0;
 
-  return new Intl.NumberFormat("es-AR", {
-    style: "currency",
-    currency: "ARS",
-    maximumFractionDigits: 0
-  }).format(numero);
+      border-radius: 18px;
+
+      box-shadow:
+        0 20px 60px rgba(0,0,0,0.30);
+
+      overflow: hidden;
+
+      animation: aparecerPedido 0.2s ease;
+    }
+
+
+    @keyframes aparecerPedido {
+
+      from {
+        opacity: 0;
+        transform: translateY(15px) scale(0.98);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+
+    }
+
+
+    .pedido-modal-header {
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      padding: 20px 22px;
+
+      background: #3c2415;
+      color: white;
+    }
+
+
+    .pedido-modal-header h3 {
+
+      margin: 0;
+
+      font-size: 1.25rem;
+
+    }
+
+
+    .pedido-cerrar {
+
+      border: none;
+      background: transparent;
+
+      color: white;
+
+      font-size: 2rem;
+
+      line-height: 1;
+
+      cursor: pointer;
+
+      padding: 0 5px;
+
+    }
+
+
+    .pedido-contenido {
+
+      padding: 22px;
+
+    }
+
+
+    .pedido-producto {
+
+      padding: 15px;
+
+      margin-bottom: 18px;
+
+      border-radius: 12px;
+
+      background: #e8d0b5;
+
+    }
+
+
+    .pedido-producto h4 {
+
+      margin: 0 0 5px;
+
+      color: #3c2415;
+
+      font-size: 1.05rem;
+
+    }
+
+
+    .pedido-producto p {
+
+      margin: 0;
+
+      color: #6f4e37;
+
+      font-weight: 700;
+
+    }
+
+
+    .pedido-campo {
+
+      margin-bottom: 15px;
+
+    }
+
+
+    .pedido-campo label {
+
+      display: block;
+
+      margin-bottom: 6px;
+
+      color: #3c2415;
+
+      font-weight: 700;
+
+    }
+
+
+    .pedido-campo label span {
+
+      font-weight: 400;
+
+      opacity: 0.7;
+
+      font-size: 0.9em;
+
+    }
+
+
+    .pedido-campo input,
+    .pedido-campo select,
+    .pedido-campo textarea {
+
+      width: 100%;
+
+      box-sizing: border-box;
+
+      padding: 11px 12px;
+
+      border: 1px solid #c8b39e;
+
+      border-radius: 9px;
+
+      background: white;
+
+      color: #3c2415;
+
+      font-family: inherit;
+
+      font-size: 1rem;
+
+      outline: none;
+
+    }
+
+
+    .pedido-campo input:focus,
+    .pedido-campo select:focus,
+    .pedido-campo textarea:focus {
+
+      border-color: #c86d51;
+
+      box-shadow: 0 0 0 2px rgba(200,109,81,0.15);
+
+    }
+
+
+    .pedido-campo textarea {
+
+      resize: vertical;
+
+      min-height: 80px;
+
+    }
+
+
+    .pedido-total {
+
+      display: flex;
+
+      justify-content: space-between;
+
+      align-items: center;
+
+      margin-top: 20px;
+
+      padding: 15px;
+
+      border-radius: 10px;
+
+      background: #3c2415;
+
+      color: white;
+
+      font-size: 1.15rem;
+
+    }
+
+
+    .pedido-total strong {
+
+      font-size: 1.3rem;
+
+    }
+
+
+    .pedido-botones {
+
+      display: flex;
+
+      gap: 10px;
+
+      margin-top: 18px;
+
+    }
+
+
+    .pedido-btn {
+
+      flex: 1;
+
+      border: none;
+
+      border-radius: 9px;
+
+      padding: 12px 15px;
+
+      font-family: inherit;
+
+      font-size: 1rem;
+
+      font-weight: 700;
+
+      cursor: pointer;
+
+      transition: 0.2s ease;
+
+    }
+
+
+    .pedido-btn:hover {
+
+      transform: translateY(-1px);
+
+    }
+
+
+    .pedido-btn-cancelar {
+
+      background: #ddd0c4;
+
+      color: #3c2415;
+
+    }
+
+
+    .pedido-btn-confirmar {
+
+      background: #c86d51;
+
+      color: white;
+
+    }
+
+
+    .pedido-btn-confirmar:hover {
+
+      background: #b85d43;
+
+    }
+
+
+    .pedido-btn-confirmar:disabled {
+
+      opacity: 0.6;
+
+      cursor: wait;
+
+      transform: none;
+
+    }
+
+
+    .boton-hacer-pedido {
+
+      margin-top: 10px;
+
+      width: 100%;
+
+      border: none;
+
+      border-radius: 8px;
+
+      padding: 10px 14px;
+
+      background: #c86d51;
+
+      color: white;
+
+      font-family: inherit;
+
+      font-weight: 700;
+
+      cursor: pointer;
+
+      transition: 0.2s ease;
+
+    }
+
+
+    .boton-hacer-pedido:hover {
+
+      background: #b85d43;
+
+      transform: translateY(-1px);
+
+    }
+
+
+    @media (max-width: 480px) {
+
+      #modal-pedido {
+
+        padding: 10px;
+
+      }
+
+
+      .pedido-contenido {
+
+        padding: 17px;
+
+      }
+
+
+      .pedido-botones {
+
+        flex-direction: column;
+
+      }
+
+    }
+
+  `;
+
+  document.head.appendChild(estilos);
+
+
+  // ==========================================
+  // VARIABLES DEL MODAL
+  // ==========================================
+
+  const inputCantidad =
+    document.getElementById("pedido-cantidad");
+
+  const inputNombre =
+    document.getElementById("pedido-nombre");
+
+  const inputWhatsapp =
+    document.getElementById("pedido-whatsapp");
+
+  const selectSector =
+    document.getElementById("pedido-sector");
+
+  const inputObservaciones =
+    document.getElementById("pedido-observaciones");
+
+  const totalElemento =
+    document.getElementById("pedido-total");
+
+  const botonConfirmar =
+    document.getElementById("pedido-confirmar");
+
+
+  // ==========================================
+  // ACTUALIZAR TOTAL
+  // ==========================================
+
+  function actualizarTotal() {
+
+    let cantidad = parseInt(
+      inputCantidad.value,
+      10
+    );
+
+    if (isNaN(cantidad) || cantidad < 1) {
+      cantidad = 1;
+      inputCantidad.value = 1;
+    }
+
+    const total = precioActual * cantidad;
+
+    totalElemento.textContent =
+      formatearPrecio(total);
+  }
+
+
+  inputCantidad.addEventListener(
+    "input",
+    actualizarTotal
+  );
+
+
+  // ==========================================
+  // CERRAR MODAL
+  // ==========================================
+
+  function cerrarModal() {
+
+    overlay.remove();
+
+    const estilosModal =
+      document.getElementById(
+        "estilos-modal-pedido"
+      );
+
+    if (estilosModal) {
+      estilosModal.remove();
+    }
+
+  }
+
+
+  document
+    .getElementById("pedido-cerrar")
+    .addEventListener(
+      "click",
+      cerrarModal
+    );
+
+
+  document
+    .getElementById("pedido-cancelar")
+    .addEventListener(
+      "click",
+      cerrarModal
+    );
+
+
+  // Cerrar haciendo clic fuera del cuadro
+
+  overlay.addEventListener(
+    "click",
+    function (event) {
+
+      if (event.target === overlay) {
+        cerrarModal();
+      }
+
+    }
+  );
+
+
+  // ==========================================
+  // CONFIRMAR PEDIDO
+  // ==========================================
+
+  botonConfirmar.addEventListener(
+    "click",
+    async function () {
+
+      const nombre =
+        inputNombre.value.trim();
+
+      const whatsapp =
+        inputWhatsapp.value.trim();
+
+      const sector =
+        selectSector.value;
+
+      const observaciones =
+        inputObservaciones.value.trim();
+
+      let cantidad =
+        parseInt(
+          inputCantidad.value,
+          10
+        );
+
+
+      // ========================================
+      // VALIDACIONES
+      // ========================================
+
+      if (!nombre) {
+
+        alert(
+          "Por favor, ingresá tu nombre."
+        );
+
+        inputNombre.focus();
+
+        return;
+      }
+
+
+      if (!whatsapp) {
+
+        alert(
+          "Por favor, ingresá tu WhatsApp o teléfono."
+        );
+
+        inputWhatsapp.focus();
+
+        return;
+      }
+
+
+      if (!sector) {
+
+        alert(
+          "Por favor, seleccioná el sector."
+        );
+
+        selectSector.focus();
+
+        return;
+      }
+
+
+      if (
+        isNaN(cantidad) ||
+        cantidad < 1
+      ) {
+
+        cantidad = 1;
+
+        inputCantidad.value = 1;
+
+      }
+
+
+      // ========================================
+      // SUBTOTAL
+      // ========================================
+
+      const subtotal =
+        precioActual * cantidad;
+
+
+      // ========================================
+      // OBJETO DEL PEDIDO
+      // ========================================
+
+      const pedido = {
+
+        nombre: nombre,
+
+        whatsapp: whatsapp,
+
+        sector: sector,
+
+        observaciones:
+          observaciones || "",
+
+        productos: [
+
+          {
+
+            nombre:
+              productoActual,
+
+            cantidad:
+              cantidad,
+
+            precio:
+              precioActual,
+
+            subtotal:
+              subtotal
+
+          }
+
+        ],
+
+        total:
+          subtotal,
+
+        estado:
+          "Pendiente",
+
+        fecha:
+          new Date().toISOString()
+
+      };
+
+
+      // ========================================
+      // DESACTIVAR BOTÓN
+      // ========================================
+
+      botonConfirmar.disabled = true;
+
+      botonConfirmar.innerHTML = `
+        <i class="fa-solid fa-spinner fa-spin"></i>
+        Enviando...
+      `;
+
+
+      // ========================================
+      // GUARDAR EN FIRESTORE
+      // ========================================
+
+      try {
+
+        await addDoc(
+          collection(db, "pedidos"),
+          pedido
+        );
+
+
+        // ======================================
+        // PEDIDO GUARDADO
+        // ======================================
+
+        alert(
+          "¡Pedido enviado correctamente! ☕\n\n" +
+          "Tu pedido quedó registrado como Pendiente."
+        );
+
+
+        cerrarModal();
+
+
+      } catch (error) {
+
+        console.error(
+          "Error al guardar el pedido:",
+          error
+        );
+
+
+        alert(
+          "No se pudo enviar el pedido.\n\n" +
+          "Por favor, intentá nuevamente."
+        );
+
+
+        botonConfirmar.disabled = false;
+
+        botonConfirmar.innerHTML = `
+          <i class="fa-solid fa-check"></i>
+          Confirmar pedido
+        `;
+
+      }
+
+    }
+  );
 
 }
 
 
 // ============================================
-// ACTUALIZAR TOTAL
+// FORMATEAR PRECIO
 // ============================================
 
-function actualizarTotal() {
+function formatearPrecio(valor) {
 
-  if (!productoSeleccionado) {
-    return;
+  return new Intl.NumberFormat(
+    "es-AR",
+    {
+      style: "currency",
+      currency: "ARS",
+      maximumFractionDigits: 0
+    }
+  ).format(valor);
+
+}
+
+
+// ============================================
+// OBTENER PRECIO DESDE TEXTO
+// ============================================
+
+function obtenerPrecio(texto) {
+
+  if (!texto) {
+    return 0;
   }
 
-  const total =
-    productoSeleccionado.precio * cantidad;
 
-  totalValor.textContent =
-    formatearPrecio(total);
+  // Ejemplo:
+  // "$2.500"
+  // "$5.000"
+  // "$16.000"
+
+  const numero = texto
+    .replace(/\$/g, "")
+    .replace(/\./g, "")
+    .replace(/,/g, ".")
+    .replace(/[^\d.]/g, "")
+    .trim();
+
+
+  const precio =
+    parseFloat(numero);
+
+
+  return isNaN(precio)
+    ? 0
+    : precio;
 
 }
 
@@ -516,539 +972,405 @@ function actualizarTotal() {
 // ABRIR PEDIDO
 // ============================================
 
-function abrirPedido(nombre, precio) {
+function abrirPedido(
+  nombre,
+  precio
+) {
 
-  productoSeleccionado = {
-    nombre: nombre,
-    precio: Number(precio)
-  };
+  productoActual = nombre;
 
-  cantidad = 1;
+  precioActual = precio;
 
-  productoNombre.textContent =
-    productoSeleccionado.nombre;
 
-  productoPrecio.textContent =
-    formatearPrecio(productoSeleccionado.precio);
+  // Crear el modal
 
-  cantidadValor.textContent =
-    cantidad;
+  crearModalPedido();
+
+
+  // Obtener elementos
+
+  const modal =
+    document.getElementById(
+      "modal-pedido"
+    );
+
+
+  const nombreProducto =
+    document.getElementById(
+      "pedido-producto-nombre"
+    );
+
+
+  const precioProducto =
+    document.getElementById(
+      "pedido-producto-precio"
+    );
+
+
+  const inputCantidad =
+    document.getElementById(
+      "pedido-cantidad"
+    );
+
+
+  const inputNombre =
+    document.getElementById(
+      "pedido-nombre"
+    );
+
+
+  const inputWhatsapp =
+    document.getElementById(
+      "pedido-whatsapp"
+    );
+
+
+  const selectSector =
+    document.getElementById(
+      "pedido-sector"
+    );
+
+
+  const inputObservaciones =
+    document.getElementById(
+      "pedido-observaciones"
+    );
+
+
+  // ==========================================
+  // COMPROBACIÓN DE SEGURIDAD
+  // ==========================================
+
+  if (
+    !modal ||
+    !nombreProducto ||
+    !precioProducto ||
+    !inputCantidad ||
+    !inputNombre ||
+    !inputWhatsapp ||
+    !selectSector ||
+    !inputObservaciones
+  ) {
+
+    console.error(
+      "No se pudieron encontrar todos los elementos del formulario de pedido."
+    );
+
+    return;
+
+  }
+
+
+  // ==========================================
+  // CARGAR DATOS
+  // ==========================================
+
+  nombreProducto.textContent =
+    nombre;
+
+
+  precioProducto.textContent =
+    formatearPrecio(precio);
+
+
+  inputCantidad.value = 1;
 
   inputNombre.value = "";
+
+  inputWhatsapp.value = "";
+
   selectSector.value = "";
+
   inputObservaciones.value = "";
 
-  mensaje.className = "pedido-mensaje";
-  mensaje.textContent = "";
 
-  botonConfirmar.disabled = false;
+  // ==========================================
+  // ACTUALIZAR TOTAL
+  // ==========================================
 
-  actualizarTotal();
-
-  overlay.classList.add("activo");
-
-  setTimeout(() => {
-    inputNombre.focus();
-  }, 100);
-
-}
-
-
-// ============================================
-// CERRAR PEDIDO
-// ============================================
-
-function cerrarPedido() {
-
-  overlay.classList.remove("activo");
-
-}
-
-
-// ============================================
-// BOTONES DE CANTIDAD
-// ============================================
-
-document
-  .getElementById("pedido-cantidad-menos")
-  .addEventListener("click", () => {
-
-    if (cantidad > 1) {
-      cantidad--;
-
-      cantidadValor.textContent =
-        cantidad;
-
-      actualizarTotal();
-    }
-
-  });
-
-
-document
-  .getElementById("pedido-cantidad-mas")
-  .addEventListener("click", () => {
-
-    cantidad++;
-
-    cantidadValor.textContent =
-      cantidad;
-
-    actualizarTotal();
-
-  });
-
-
-// ============================================
-// CERRAR
-// ============================================
-
-document
-  .getElementById("pedido-cerrar")
-  .addEventListener("click", cerrarPedido);
-
-document
-  .getElementById("pedido-cancelar")
-  .addEventListener("click", cerrarPedido);
-
-
-// Cerrar tocando fuera de la ventana
-
-overlay.addEventListener("click", (event) => {
-
-  if (event.target === overlay) {
-    cerrarPedido();
-  }
-
-});
-
-
-// ============================================
-// CONFIRMAR PEDIDO
-// ============================================
-
-botonConfirmar.addEventListener("click", async () => {
-
-  const nombre =
-    inputNombre.value.trim();
-
-  const sector =
-    selectSector.value;
-
-  const observaciones =
-    inputObservaciones.value.trim();
-
-
-  // Validaciones
-
-  if (!nombre) {
-
-    mostrarMensaje(
-      "Por favor, ingresá tu nombre.",
-      "error"
+  const totalElemento =
+    document.getElementById(
+      "pedido-total"
     );
 
-    inputNombre.focus();
 
-    return;
-  }
-
-
-  if (!sector) {
-
-    mostrarMensaje(
-      "Por favor, seleccioná un sector.",
-      "error"
-    );
-
-    selectSector.focus();
-
-    return;
-  }
+  totalElemento.textContent =
+    formatearPrecio(precio);
 
 
-  if (!productoSeleccionado) {
+  // ==========================================
+  // MOSTRAR
+  // ==========================================
 
-    mostrarMensaje(
-      "No se pudo identificar el producto.",
-      "error"
-    );
-
-    return;
-  }
+  modal.style.display = "flex";
 
 
-  // Desactivar botón para evitar
-  // pedidos duplicados
+  // Evitar desplazamiento de la página
 
-  botonConfirmar.disabled = true;
-
-  botonConfirmar.textContent =
-    "Guardando pedido...";
+  document.body.style.overflow =
+    "hidden";
 
 
-  try {
+  // Devolver scroll al cerrar
 
-    const total =
-      productoSeleccionado.precio * cantidad;
+  const observer =
+    new MutationObserver(
+      function () {
 
+        if (
+          !document.body.contains(modal)
+        ) {
 
-    const pedido = {
+          document.body.style.overflow =
+            "";
 
-      nombre: nombre,
-
-      sector: sector,
-
-      observaciones:
-        observaciones || "",
-
-      productos: [
-
-        {
-
-          nombre:
-            productoSeleccionado.nombre,
-
-          cantidad:
-            cantidad,
-
-          precio:
-            productoSeleccionado.precio,
-
-          subtotal:
-            total
+          observer.disconnect();
 
         }
 
-      ],
-
-      total: total,
-
-      estado: "Pendiente",
-
-      fecha:
-        new Date().toISOString()
-
-    };
-
-
-    // Guardar en Firestore
-
-    await addDoc(
-      collection(db, "pedidos"),
-      pedido
+      }
     );
 
 
-    mostrarMensaje(
-      "¡Pedido enviado correctamente! ☕",
-      "exito"
-    );
+  observer.observe(
+    document.body,
+    {
+      childList: true
+    }
+  );
 
 
-    botonConfirmar.textContent =
-      "Pedido enviado ✓";
+  // ==========================================
+  // ENFOCAR NOMBRE
+  // ==========================================
 
+  setTimeout(
+    function () {
 
-    setTimeout(() => {
+      inputNombre.focus();
 
-      cerrarPedido();
-
-      botonConfirmar.disabled = false;
-
-      botonConfirmar.textContent =
-        "Confirmar pedido";
-
-    }, 2200);
-
-
-  } catch (error) {
-
-    console.error(
-      "Error al guardar el pedido:",
-      error
-    );
-
-
-    mostrarMensaje(
-      "No se pudo enviar el pedido. Intentá nuevamente.",
-      "error"
-    );
-
-
-    botonConfirmar.disabled = false;
-
-    botonConfirmar.textContent =
-      "Confirmar pedido";
-
-  }
-
-});
-
-
-// ============================================
-// MOSTRAR MENSAJE
-// ============================================
-
-function mostrarMensaje(texto, tipo) {
-
-  mensaje.textContent = texto;
-
-  mensaje.className =
-    `pedido-mensaje visible ${tipo}`;
+    },
+    100
+  );
 
 }
 
 
 // ============================================
-// CREAR AUTOMÁTICAMENTE LOS BOTONES
-// "HACER PEDIDO"
+// ACTIVAR BOTONES DE PRODUCTOS
 // ============================================
 
 function activarBotonesPedido() {
 
   const productos =
-    document.querySelectorAll(".menu-item");
+    document.querySelectorAll(
+      ".menu-item"
+    );
 
 
-  productos.forEach((producto) => {
+  productos.forEach(
+    function (producto) {
 
-    // Buscar nombre y precio del producto
+      // Evitar botones duplicados
 
-    const elementoNombre =
-      producto.querySelector(".item-info h4");
+      if (
+        producto.querySelector(
+          ".boton-hacer-pedido"
+        )
+      ) {
 
-    const elementoPrecio =
-      producto.querySelector(".item-price");
+        return;
 
-
-    // Si no tiene nombre o precio,
-    // no hacemos nada
-
-    if (!elementoNombre || !elementoPrecio) {
-      return;
-    }
+      }
 
 
-    // Evitar crear el botón dos veces
-
-    if (
-      producto.querySelector(".boton-hacer-pedido")
-    ) {
-      return;
-    }
+      const elementoNombre =
+        producto.querySelector(
+          ".item-info h4"
+        );
 
 
-    const nombre =
-      elementoNombre.textContent.trim();
+      const elementoPrecio =
+        producto.querySelector(
+          ".item-price"
+        );
 
 
-    // Convertir "$2.500" en 2500
+      if (
+        !elementoNombre ||
+        !elementoPrecio
+      ) {
 
-    const precioTexto =
-      elementoPrecio.textContent.trim();
+        return;
+
+      }
 
 
-    const precio =
-      Number(
-        precioTexto.replace(/[^\d]/g, "")
+      const nombre =
+        elementoNombre.textContent.trim();
+
+
+      const precio =
+        obtenerPrecio(
+          elementoPrecio.textContent
+        );
+
+
+      // Crear botón
+
+      const boton =
+        document.createElement("button");
+
+
+      boton.type =
+        "button";
+
+
+      boton.className =
+        "boton-hacer-pedido";
+
+
+      boton.innerHTML = `
+        <i class="fa-solid fa-cart-shopping"></i>
+        Hacer pedido
+      `;
+
+
+      boton.addEventListener(
+        "click",
+        function () {
+
+          abrirPedido(
+            nombre,
+            precio
+          );
+
+        }
       );
 
 
-    if (!precio || precio <= 0) {
-      return;
+      producto.appendChild(
+        boton
+      );
+
     }
-
-
-    // Crear botón
-
-    const boton =
-      document.createElement("button");
-
-
-    boton.type = "button";
-
-    boton.className =
-      "boton-hacer-pedido";
-
-
-    boton.textContent =
-      "Hacer pedido";
-
-
-    // Guardar datos del producto
-
-    boton.dataset.pedidoNombre =
-      nombre;
-
-    boton.dataset.pedidoPrecio =
-      precio;
-
-
-    // Estilos del botón
-
-    boton.style.marginTop = "10px";
-
-    boton.style.padding =
-      "9px 16px";
-
-    boton.style.border =
-      "none";
-
-    boton.style.borderRadius =
-      "8px";
-
-    boton.style.background =
-      "#c86d51";
-
-    boton.style.color =
-      "#ffffff";
-
-    boton.style.fontFamily =
-      "inherit";
-
-    boton.style.fontSize =
-      "0.88rem";
-
-    boton.style.fontWeight =
-      "600";
-
-    boton.style.cursor =
-      "pointer";
-
-    boton.style.transition =
-      "all 0.2s ease";
-
-
-    // Efecto al pasar el mouse
-
-    boton.addEventListener(
-      "mouseenter",
-      () => {
-
-        boton.style.transform =
-          "translateY(-2px)";
-
-        boton.style.opacity =
-          "0.9";
-
-      }
-    );
-
-
-    boton.addEventListener(
-      "mouseleave",
-      () => {
-
-        boton.style.transform =
-          "translateY(0)";
-
-        boton.style.opacity =
-          "1";
-
-      }
-    );
-
-
-    // Abrir ventana de pedido
-
-    boton.addEventListener(
-      "click",
-      () => {
-
-        abrirPedido(
-          nombre,
-          precio
-        );
-
-      }
-    );
-
-
-    // Agregar botón debajo del nombre y descripción
-
-    elementoNombre.parentElement.appendChild(boton);
-
-  });
+  );
 
 }
 
+
 // ============================================
-// ACTIVAR BOTONES DE COMBOS Y PROMOCIONES
+// ACTIVAR BOTONES DE PROMOCIONES / COMBOS
 // ============================================
 
 function activarBotonesPromociones() {
 
   const promociones =
-    document.querySelectorAll(".promo-card");
+    document.querySelectorAll(
+      ".promo-card"
+    );
 
-  promociones.forEach((promocion) => {
 
-    const elementoNombre =
-      promocion.querySelector(".promo-title");
+  promociones.forEach(
+    function (promocion) {
 
-    const elementoPrecio =
-      promocion.querySelector(".promo-price");
+      // Buscar nombre
 
-    const boton =
-      promocion.querySelector(".btn");
+      const elementoNombre =
+        promocion.querySelector(
+          ".promo-title"
+        );
 
-    if (!elementoNombre || !elementoPrecio || !boton) {
-      return;
-    }
 
-    const nombre =
-      elementoNombre.textContent.trim();
+      // Buscar precio
 
-    const precioTexto =
-      elementoPrecio.textContent.trim();
+      const elementoPrecio =
+        promocion.querySelector(
+          ".promo-price"
+        );
 
-    const precio =
-      Number(
-        precioTexto.replace(/[^\d]/g, "")
+
+      // Buscar botón existente
+
+      const boton =
+        promocion.querySelector(
+          ".btn"
+        );
+
+
+      if (
+        !elementoNombre ||
+        !elementoPrecio ||
+        !boton
+      ) {
+
+        return;
+
+      }
+
+
+      const nombre =
+        elementoNombre.textContent.trim();
+
+
+      const precio =
+        obtenerPrecio(
+          elementoPrecio.textContent
+        );
+
+
+      // El botón originalmente puede tener:
+      // href="#contacto"
+
+      boton.removeAttribute(
+        "href"
       );
 
-    if (!precio || precio <= 0) {
-      return;
-    }
 
-    // Evitar que el botón lleve a Horarios y contacto
-    boton.removeAttribute("href");
-
-    // Cambiar el texto del botón
-    boton.innerHTML =
-      '<i class="fa-solid fa-cart-shopping"></i> Hacer pedido';
-
-    // Abrir la ventana de pedido
-    boton.addEventListener("click", (event) => {
-
-      event.preventDefault();
-
-      abrirPedido(
-        nombre,
-        precio
+      boton.setAttribute(
+        "type",
+        "button"
       );
 
-    });
 
-  });
+      boton.innerHTML = `
+        <i class="fa-solid fa-cart-shopping"></i>
+        Hacer pedido
+      `;
+
+
+      boton.addEventListener(
+        "click",
+        function (event) {
+
+          event.preventDefault();
+
+
+          abrirPedido(
+            nombre,
+            precio
+          );
+
+        }
+      );
+
+    }
+  );
 
 }
 
-// ============================================
-// ACTIVAR BOTONES
-// ============================================
-
-activarBotonesPedido();
-
-activarBotonesPromociones();
 
 // ============================================
-// EXPORTAR FUNCIÓN
+// INICIALIZAR
 // ============================================
 
-export {
-  abrirPedido,
-  activarBotonesPedido,
-  activarBotonesPromociones
-};
+document.addEventListener(
+  "DOMContentLoaded",
+  function () {
+
+    activarBotonesPedido();
+
+    activarBotonesPromociones();
+
+  }
+);
