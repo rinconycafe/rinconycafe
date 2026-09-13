@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Pedidos - Rincón & Café</title>
+
+  <style>
+    :root {
+      --marron-oscuro: #3c2415;
+      --marron: #6f4e37;
+      --terracota: #c86d51;
+      --crema: #faf6f0;
+      --beige: #e8d0b5;
+      --verde: #8a9a86;
+      --blanco: #ffffff;
+      --texto: #2b1e16;
+      --gris: #66554b;
+      --rojo: #b94a48;
+      --amarillo: #d99b32;
+      --verde-ok: #5d8a62;
+      --sombra: 0 10px 30px rgba(60, 36, 21, 0.10);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--crema);
+      color: var(--texto);
+    }
+
+    /* =========================
+       ENCABEZADO
+    ========================= */
+
+    .admin-header {
+      background: var(--marron-oscuro);
+      color: white;
+      padding: 20px;
+      box-shadow: var(--sombra);
+    }
+
+    .admin-header-contenido {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .admin-titulo {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+
+    .admin-subtitulo {
+      margin: 5px 0 0;
+      color: #e8d0b5;
+      font-size: 0.9rem;
+    }
+
+    .btn-volver {
+      display: inline-block;
+      padding: 10px 16px;
+
+      border-radius: 8px;
+      background: var(--terracota);
+      color: white;
+
+      text-decoration: none;
+      font-weight: bold;
+
+      transition: 0.2s ease;
+    }
+
+    .btn-volver:hover {
+      background: #b85d43;
+      transform: translateY(-1px);
+    }
+
+    /* =========================
+       CONTENIDO
+    ========================= */
+
+    .contenedor {
+      width: 100%;
+      max-width: 1200px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+
+    /* =========================
+       BLOQUE SIN ACCESO
+    ========================= */
+
+    #bloque-sin-acceso {
+      max-width: 600px;
+      margin: 80px auto;
+      padding: 35px 25px;
+
+      text-align: center;
+
+      background: white;
+      border-radius: 16px;
+      box-shadow: var(--sombra);
+    }
+
+    #bloque-sin-acceso h2 {
+      margin-top: 0;
+      color: var(--marron-oscuro);
+    }
+
+    #bloque-sin-acceso p {
+      color: var(--gris);
+      line-height: 1.6;
+    }
+
+    .oculto {
+      display: none !important;
+    }
+
+    /* =========================
+       RESUMEN
+    ========================= */
+
+    .resumen {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    .resumen-card {
+      background: white;
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: var(--sombra);
+    }
+
+    .resumen-card span {
+      display: block;
+      color: var(--gris);
+      font-size: 0.9rem;
+      margin-bottom: 8px;
+    }
+
+    .resumen-card strong {
+      display: block;
+      font-size: 1.8rem;
+      color: var(--marron-oscuro);
+    }
+
+    /* =========================
+       BARRA DE PEDIDOS
+    ========================= */
+
+    .barra-pedidos {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+
+      margin-bottom: 20px;
+      padding: 18px 20px;
+
+      background: white;
+      border-radius: 14px;
+      box-shadow: var(--sombra);
+    }
+
+    .barra-pedidos h2 {
+      margin: 0;
+      color: var(--marron-oscuro);
+      font-size: 1.3rem;
+    }
+
+    .estado-conexion {
+      font-size: 0.9rem;
+      color: var(--verde-ok);
+      font-weight: bold;
+    }
+
+    /* =========================
+       PEDIDOS
+    ========================= */
+
+    #lista-pedidos {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .pedido-card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: var(--sombra);
+      overflow: hidden;
+    }
+
+    .pedido-cabecera {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 20px;
+
+      padding: 20px;
+
+      border-bottom: 1px solid #eee;
+    }
+
+    .pedido-numero {
+      margin: 0 0 5px;
+      color: var(--marron-oscuro);
+      font-size: 1.15rem;
+    }
+
+    .pedido-fecha {
+      color: var(--gris);
+      font-size: 0.85rem;
+    }
+
+    .estado-badge {
+      display: inline-block;
+
+      padding: 7px 12px;
+      border-radius: 20px;
+
+      font-size: 0.85rem;
+      font-weight: bold;
+      white-space: nowrap;
+    }
+
+    .estado-pendiente {
+      background: #fff0c9;
+      color: #8a6100;
+    }
+
+    .estado-preparando {
+      background: #f6d6c7;
+      color: #91452f;
+    }
+
+    .estado-listo {
+      background: #d9eadb;
+      color: #3e6a43;
+    }
+
+    .estado-entregado {
+      background: #dce5ea;
+      color: #405866;
+    }
+
+    .estado-cancelado {
+      background: #f2d5d5;
+      color: #8c3636;
+    }
+
+    /* =========================
+       DATOS DEL CLIENTE
+    ========================= */
+
+    .pedido-datos {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+
+      padding: 20px;
+
+      background: #fcfaf7;
+    }
+
+    .dato {
+      min-width: 0;
+    }
+
+    .dato-label {
+      display: block;
+      margin-bottom: 5px;
+
+      color: var(--gris);
+      font-size: 0.8rem;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .dato-valor {
+      color: var(--texto);
+      font-weight: 600;
+      word-break: break-word;
+    }
+
+    /* =========================
+       PRODUCTOS
+    ========================= */
+
+    .pedido-productos {
+      padding: 20px;
+    }
+
+    .pedido-productos h3 {
+      margin: 0 0 12px;
+      color: var(--marron-oscuro);
+      font-size: 1rem;
+    }
+
+    .producto-linea {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+
+      padding: 10px 0;
+
+      border-bottom: 1px solid #eee;
+    }
+
+    .producto-linea:last-child {
+      border-bottom: none;
+    }
+
+    .producto-nombre {
+      font-weight: 600;
+    }
+
+    .producto-detalle {
+      color: var(--gris);
+      font-size: 0.9rem;
+      margin-top: 3px;
+    }
+
+    .producto-subtotal {
+      font-weight: bold;
+      color: var(--marron);
+      white-space: nowrap;
+    }
+
+    /* =========================
+       OBSERVACIONES
+    ========================= */
+
+    .pedido-observaciones {
+      margin: 0 20px 20px;
+      padding: 14px;
+
+      background: var(--beige);
+      border-radius: 10px;
+    }
+
+    .pedido-observaciones strong {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--marron-oscuro);
+    }
+
+    .pedido-observaciones p {
+      margin: 0;
+      color: var(--texto);
+    }
+
+    /* =========================
+       TOTAL
+    ========================= */
+
+    .pedido-total {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      padding: 15px 20px;
+
+      background: var(--marron-oscuro);
+      color: white;
+    }
+
+    .pedido-total strong {
+      font-size: 1.25rem;
+    }
+
+    /* =========================
+       ACCIONES
+    ========================= */
+
+    .pedido-acciones {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+
+      padding: 18px 20px;
+    }
+
+    .btn-estado,
+    .btn-eliminar {
+      border: none;
+      border-radius: 8px;
+
+      padding: 10px 14px;
+
+      font-family: inherit;
+      font-weight: bold;
+
+      cursor: pointer;
+
+      transition: 0.2s ease;
+    }
+
+    .btn-estado:hover,
+    .btn-eliminar:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-pendiente {
+      background: #fff0c9;
+      color: #8a6100;
+    }
+
+    .btn-preparando {
+      background: #f6d6c7;
+      color: #91452f;
+    }
+
+    .btn-listo {
+      background: #d9eadb;
+      color: #3e6a43;
+    }
+
+    .btn-entregado {
+      background: #dce5ea;
+      color: #405866;
+    }
+
+    .btn-eliminar {
+      background: #f2d5d5;
+      color: #8c3636;
+      margin-left: auto;
+    }
+
+    /* =========================
+       SIN PEDIDOS
+    ========================= */
+
+    .sin-pedidos {
+      padding: 50px 20px;
+
+      text-align: center;
+
+      background: white;
+      border-radius: 16px;
+      box-shadow: var(--sombra);
+    }
+
+    .sin-pedidos h3 {
+      margin-top: 0;
+      color: var(--marron-oscuro);
+    }
+
+    .sin-pedidos p {
+      color: var(--gris);
+    }
+
+    /* =========================
+       CARGANDO
+    ========================= */
+
+    .cargando {
+      padding: 40px;
+      text-align: center;
+      color: var(--gris);
+    }
+
+    /* =========================
+       RESPONSIVE
+    ========================= */
+
+    @media (max-width: 800px) {
+      .resumen {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .pedido-datos {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .admin-header-contenido {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+
+    @media (max-width: 550px) {
+      .contenedor {
+        padding: 0 12px;
+        margin-top: 20px;
+      }
+
+      .resumen {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .resumen-card {
+        padding: 15px;
+      }
+
+      .resumen-card strong {
+        font-size: 1.4rem;
+      }
+
+      .barra-pedidos {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .pedido-cabecera {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .pedido-datos {
+        grid-template-columns: 1fr;
+      }
+
+      .pedido-acciones {
+        flex-direction: column;
+      }
+
+      .btn-estado,
+      .btn-eliminar {
+        width: 100%;
+        margin-left: 0;
+      }
+
+      .producto-linea {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 5px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- =========================================
+       ENCABEZADO
+  ========================================== -->
+
+  <header class="admin-header">
+    <div class="admin-header-contenido">
+
+      <div>
+        <h1 class="admin-titulo">
+          ☕ Panel de Pedidos
+        </h1>
+
+        <p class="admin-subtitulo">
+          Rincón & Café
+        </p>
+      </div>
+
+      <a
+        href="./index.html"
+        class="btn-volver"
+      >
+        ← Volver a la tienda
+      </a>
+
+    </div>
+  </header>
+
+
+  <!-- =========================================
+       SIN ACCESO
+  ========================================== -->
+
+  <section
+    id="bloque-sin-acceso"
+    class="oculto"
+  >
+    <h2>🔒 Acceso restringido</h2>
+
+    <p>
+      No tenés permiso para acceder al
+      panel de administración de pedidos.
+    </p>
+
+    <p>
+      Iniciá sesión con la cuenta de administrador.
+    </p>
+  </section>
+
+
+  <!-- =========================================
+       PANEL ADMIN
+  ========================================== -->
+
+  <main
+    id="bloque-admin"
+    class="contenedor oculto"
+  >
+
+    <!-- RESUMEN -->
+
+    <section class="resumen">
+
+      <div class="resumen-card">
+        <span>Total de pedidos</span>
+        <strong id="resumen-total">0</strong>
+      </div>
+
+      <div class="resumen-card">
+        <span>Pendientes</span>
+        <strong id="resumen-pendientes">0</strong>
+      </div>
+
+      <div class="resumen-card">
+        <span>Preparando</span>
+        <strong id="resumen-preparando">0</strong>
+      </div>
+
+      <div class="resumen-card">
+        <span>Listos</span>
+        <strong id="resumen-listos">0</strong>
+      </div>
+
+    </section>
+
+
+    <!-- BARRA -->
+
+    <section class="barra-pedidos">
+
+      <h2>
+        Pedidos recibidos
+      </h2>
+
+      <span
+        id="estado-conexion"
+        class="estado-conexion"
+      >
+        ● Conectado en tiempo real
+      </span>
+
+    </section>
+
+
+    <!-- LISTA -->
+
+    <section id="lista-pedidos">
+
+      <div class="cargando">
+        Cargando pedidos...
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <!-- JAVASCRIPT -->
+
+  <script
+    type="module"
+    src="./pedidos-admin.js"
+  ></script>
+
+</body>
+</html>
